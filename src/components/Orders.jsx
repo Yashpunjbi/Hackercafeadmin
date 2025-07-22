@@ -1,129 +1,107 @@
-const exportCSV = () => {
-  if (!orders || orders.length === 0) {
-    alert("No orders to export");
-    return;
-  }
-
-  let csv = "Name,Phone,Address,Status,Items,Total\n";
-
-  orders.forEach((order) => {
-    const itemDetails = order.items
-      .map((item) => `${item.name} x${item.qty}`)
-      .join(" | ");
-    csv += `${order.name},${order.phone},"${order.address}",${order.status},"${itemDetails}",₹${order.total}\n`;
-  });
-
-  const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement("a");
-  link.setAttribute("href", url);
-  link.setAttribute("download", "orders.csv");
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-};
-
 import React, { useEffect, useState } from "react";
-import { collection, getDocs, doc, updateDoc } from "firebase/firestore";
 import { db } from "../firebase";
+import { collection, query, orderBy, onSnapshot } from "firebase/firestore";
 
 const Orders = () => {
   const [orders, setOrders] = useState([]);
-  const [searchTerm, setSearchTerm] = useState("");
-
-  // Fetch all orders from Firestore
-  const fetchOrders = async () => {
-    const snapshot = await getDocs(collection(db, "orders"));
-    const data = snapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-    }));
-    setOrders(data);
-  };
+  const [search, setSearch] = useState("");
 
   useEffect(() => {
-    fetchOrders();
+    const q = query(collection(db, "orders"), orderBy("createdAt", "desc"));
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const data = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      setOrders(data);
+    });
+
+    return () => unsubscribe();
   }, []);
 
-  // Handle status update
-  const handleStatusChange = async (orderId, newStatus) => {
-    try {
-      const orderRef = doc(db, "orders", orderId);
-      await updateDoc(orderRef, { status: newStatus });
-      setOrders((prev) =>
-        prev.map((o) => (o.id === orderId ? { ...o, status: newStatus } : o))
-      );
-    } catch (err) {
-      console.error("Failed to update status:", err);
-    }
-  };
-
-  // Filtered orders by name or phone
   const filteredOrders = orders.filter(
     (order) =>
-      order.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      order.phone.includes(searchTerm)
+      order.name.toLowerCase().includes(search.toLowerCase()) ||
+      order.phone.includes(search)
   );
 
+  const exportCSV = () => {
+    if (filteredOrders.length === 0) return alert("No orders to export!");
+
+    const header = ["Name", "Phone", "Address", "Items", "Total", "Status"];
+    const rows = filteredOrders.map((order) => [
+      order.name,
+      order.phone,
+      order.address,
+      order.items.map((item) => `${item.name} x${item.qty}`).join(", "),
+      order.total,
+      order.status,
+    ]);
+
+    let csvContent =
+      "data:text/csv;charset=utf-8," +
+      [header, ...rows].map((e) => e.join(",")).join("\n");
+
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", "orders.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   return (
-    <div className="max-w-4xl mx-auto p-6 bg-white rounded shadow mt-6">
-      <h2 className="text-2xl font-bold text-center text-pink-600 mb-4">
-        Customer Orders
-      </h2>
+    <div className="p-6 max-w-4xl mx-auto">
+      <h2 className="text-2xl font-bold mb-4 text-pink-600">📦 Orders</h2>
 
       <input
         type="text"
-        placeholder="Search by name or phone"
-        value={searchTerm}
-        onChange={(e) => setSearchTerm(e.target.value)}
-        className="w-full p-2 border rounded mb-4"
+        placeholder="Search by name or phone..."
+        className="mb-4 p-2 border rounded w-full"
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
       />
 
+      {/* ✅ Export CSV Button */}
+      <button
+        onClick={exportCSV}
+        className="mb-4 bg-green-600 text-white px-4 py-2 rounded float-right"
+      >
+        📥 Export CSV
+      </button>
+
       {filteredOrders.length === 0 ? (
-        <p className="text-center text-gray-500">No orders found.</p>
+        <p className="text-gray-500 mt-4">No orders found.</p>
       ) : (
-        filteredOrders.map((order) => (
-          <div
-            key={order.id}
-            className="border p-4 rounded mb-4 bg-gray-50 shadow-sm"
-          >
-            <p>
-              <strong>Name:</strong> {order.name}
-            </p>
-            <p>
-              <strong>Phone:</strong> {order.phone}
-            </p>
-            <p>
-              <strong>Address:</strong> {order.address}
-            </p>
-            <p>
-              <strong>Status:</strong>{" "}
-              <select
-                value={order.status}
-                onChange={(e) => handleStatusChange(order.id, e.target.value)}
-                className="border rounded px-2 py-1"
-              >
-                <option value="Pending">Pending</option>
-                <option value="Accepted">Accepted</option>
-                <option value="Cooking">Cooking</option>
-                <option value="Delivered">Delivered</option>
-              </select>
-            </p>
-            <p className="mt-2">
-              <strong>Items:</strong>
-            </p>
-            <ul className="list-disc ml-6">
-              {order.items.map((item, idx) => (
-                <li key={idx}>
-                  {item.name} x {item.qty} — ₹{item.price * item.qty}
-                </li>
-              ))}
-            </ul>
-            <p className="mt-2 font-semibold text-pink-600">
-              Total: ₹{order.total}
-            </p>
-          </div>
-        ))
+        <ul>
+          {filteredOrders.map((order) => (
+            <li
+              key={order.id}
+              className="border p-4 mb-4 rounded bg-white shadow"
+            >
+              <p>
+                <strong>Name:</strong> {order.name}
+              </p>
+              <p>
+                <strong>Phone:</strong> {order.phone}
+              </p>
+              <p>
+                <strong>Address:</strong> {order.address}
+              </p>
+              <p>
+                <strong>Items:</strong>{" "}
+                {order.items.map((item) => `${item.name} x${item.qty}`).join(", ")}
+              </p>
+              <p>
+                <strong>Total:</strong> ₹{order.total}
+              </p>
+              <p>
+                <strong>Status:</strong> {order.status}
+              </p>
+            </li>
+          ))}
+        </ul>
       )}
     </div>
   );
