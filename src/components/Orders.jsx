@@ -1,4 +1,4 @@
-{orders.map((order) => (
+{filteredOrders.map((order) => (
   <div key={order.id} className="bg-white p-4 rounded shadow mb-4">
     <div className="flex justify-between">
       <div>
