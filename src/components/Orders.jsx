@@ -1,3 +1,27 @@
+const exportCSV = () => {
+  if (!orders || orders.length === 0) {
+    alert("No orders to export");
+    return;
+  }
+
+  let csv = "Name,Phone,Address,Status,Items,Total\n";
+
+  orders.forEach((order) => {
+    const itemDetails = order.items
+      .map((item) => `${item.name} x${item.qty}`)
+      .join(" | ");
+    csv += `${order.name},${order.phone},"${order.address}",${order.status},"${itemDetails}",₹${order.total}\n`;
+  });
+
+  const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.setAttribute("href", url);
+  link.setAttribute("download", "orders.csv");
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+};
 
 import React, { useEffect, useState } from "react";
 import { collection, getDocs, doc, updateDoc } from "firebase/firestore";
