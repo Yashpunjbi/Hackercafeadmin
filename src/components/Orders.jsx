@@ -1,50 +1,32 @@
-import React, { useEffect, useState } from "react";
-import { db } from "../firebase";
-import { collection, onSnapshot } from "firebase/firestore";
-
-const Orders = () => {
-  const [orders, setOrders] = useState([]);
-
-  useEffect(() => {
-    const unsubscribe = onSnapshot(collection(db, "orders"), (snapshot) => {
-      const fetchedOrders = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-      setOrders(fetchedOrders);
-    });
-
-    return () => unsubscribe();
-  }, []);
-
-  return (
-    <div className="p-4">
-      <h2 className="text-2xl font-bold mb-4">Orders</h2>
-      {orders.length === 0 ? (
-        <p>No orders yet.</p>
-      ) : (
-        <ul className="space-y-4">
-          {orders.map((order) => (
-            <li key={order.id} className="border p-4 rounded shadow">
-              <p><strong>Name:</strong> {order.name}</p>
-              <p><strong>Phone:</strong> {order.phone}</p>
-              <p><strong>Address:</strong> {order.address}</p>
-              <p><strong>Total:</strong> ₹{order.total}</p>
-              <p><strong>Status:</strong> {order.status}</p>
-              <p><strong>Items:</strong></p>
-              <ul className="ml-4 list-disc">
-                {order.items.map((item, idx) => (
-                  <li key={idx}>
-                    {item.name} × {item.qty} (₹{item.price})
-                  </li>
-                ))}
-              </ul>
-            </li>
-          ))}
-        </ul>
-      )}
+{orders.map((order) => (
+  <div key={order.id} className="bg-white p-4 rounded shadow mb-4">
+    <div className="flex justify-between">
+      <div>
+        <p className="font-bold text-lg">{order.name}</p>
+        <p>{order.phone}</p>
+        <p>{order.address}</p>
+        <p className="text-gray-600 mt-1">Total: ₹{order.total}</p>
+      </div>
+      <div>
+        <select
+          className="border p-1 rounded text-sm"
+          value={order.status}
+          onChange={(e) => handleStatusChange(order.id, e.target.value)}
+        >
+          <option value="Pending">Pending</option>
+          <option value="Preparing">Preparing</option>
+          <option value="Out for Delivery">Out for Delivery</option>
+          <option value="Delivered">Delivered</option>
+        </select>
+      </div>
     </div>
-  );
-};
-
-export default Orders;
+    <ul className="text-sm mt-2">
+      {order.items.map((item, idx) => (
+        <li key={idx}>• {item.name} × {item.qty}</li>
+      ))}
+    </ul>
+    <p className="text-xs text-gray-400 mt-1">
+      {order.createdAt?.toDate().toLocaleString()}
+    </p>
+  </div>
+))}
