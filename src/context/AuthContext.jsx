@@ -1,58 +1,38 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
+import React, { createContext, useContext, useState, useEffect } from "react";
+import { signInWithEmailAndPassword, onAuthStateChanged, signOut } from "firebase/auth";
+import { auth } from "../firebase";
 
-const Login = () => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
-  const { login } = useAuth();
-  const navigate = useNavigate();
+// Context banaya
+const AuthContext = createContext();
 
-  const handleLogin = async (e) => {
-    e.preventDefault();
-    setError("");
-    try {
-      await login(email, password); // ✅ context se login
-      navigate("/"); // ✅ dashboard page pe jao
-    } catch (err) {
-      setError("Invalid email or password.");
-    }
+// ✅ AuthProvider component
+export const AuthProvider = ({ children }) => {
+  const [user, setUser] = useState(null);
+
+  // ✅ Login function
+  const login = async (email, password) => {
+    const res = await signInWithEmailAndPassword(auth, email, password);
+    setUser(res.user);
   };
 
+  // ✅ Logout function
+  const logout = () => signOut(auth);
+
+  // ✅ Realtime user listener (page refresh ke baad bhi login remember rahe)
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+    });
+
+    return () => unsubscribe();
+  }, []);
+
   return (
-    <div className="flex items-center justify-center h-screen bg-gray-100">
-      <form
-        onSubmit={handleLogin}
-        className="bg-white p-8 rounded-lg shadow-md w-80"
-      >
-        <h2 className="text-2xl font-semibold mb-4 text-center">Admin Login</h2>
-        {error && <p className="text-red-500 text-sm mb-2">{error}</p>}
-        <input
-          type="email"
-          placeholder="Email"
-          className="w-full mb-3 p-2 border rounded"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-        />
-        <input
-          type="password"
-          placeholder="Password"
-          className="w-full mb-3 p-2 border rounded"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-        />
-        <button
-          type="submit"
-          className="w-full bg-black text-white py-2 rounded hover:bg-gray-800"
-        >
-          Login
-        </button>
-      </form>
-    </div>
+    <AuthContext.Provider value={{ user, login, logout }}>
+      {children}
+    </AuthContext.Provider>
   );
 };
 
-export default Login;
+// ✅ useAuth hook
+export const useAuth = () => useContext(AuthContext);
