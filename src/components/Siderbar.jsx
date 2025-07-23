@@ -15,7 +15,7 @@ const Sidebar = () => {
 
   return (
     <div className="w-64 h-screen bg-white shadow-md p-4">
-      <h1 className="text-2xl font-bold mb-6 text-center text-pink-500">Bakchodi Admin</h1>
+      <h1 className="text-2xl font-bold mb-6 text-center text-pink-500">hacker cafe Admin</h1>
       <nav className="flex flex-col gap-2">
         <Link to="/" className={linkClass("/")}>
           <FiHome /> Dashboard
