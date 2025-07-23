@@ -1,0 +1,31 @@
+
+import React from "react";
+import { Link, useLocation } from "react-router-dom";
+import { FiHome, FiList } from "react-icons/fi";
+
+const Sidebar = () => {
+  const location = useLocation();
+
+  const linkClass = (path) =>
+    `flex items-center gap-2 px-4 py-3 rounded-lg ${
+      location.pathname === path
+        ? "bg-black text-white"
+        : "hover:bg-gray-200 text-gray-700"
+    }`;
+
+  return (
+    <div className="w-64 h-screen bg-white shadow-md p-4">
+      <h1 className="text-2xl font-bold mb-6 text-center text-pink-500">hacker cafe Admin</h1>
+      <nav className="flex flex-col gap-2">
+        <Link to="/" className={linkClass("/")}>
+          <FiHome /> Dashboard
+        </Link>
+        <Link to="/orders" className={linkClass("/orders")}>
+          <FiList /> Orders
+        </Link>
+      </nav>
+    </div>
+  );
+};
+
+export default Sidebar;
