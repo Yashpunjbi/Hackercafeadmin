@@ -1,22 +1,30 @@
-import React, { useState } from "react";
-import Sidebar from "../components/Sidebar";
-import Topbar from "../components/Topbar";
-import Orders from "../components/Orders";
-import Dashboard from "../components/Dashboard";
+import React from "react";
+import { signOut } from "firebase/auth";
+import { auth } from "../firebase";
+import { useNavigate } from "react-router-dom";
 
 const Home = () => {
-  const [page, setPage] = useState("dashboard");
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    await signOut(auth);
+    navigate("/login");
+  };
 
   return (
-    <div className="flex h-screen bg-gray-100">
-      <Sidebar setPage={setPage} />
-      <div className="flex-1 flex flex-col">
-        <Topbar />
-        <div className="flex-1 overflow-auto">
-          {page === "dashboard" && <Dashboard />}
-          {page === "orders" && <Orders />}
-        </div>
-      </div>
+    <div className="min-h-screen bg-gradient-to-br from-yellow-100 via-red-100 to-pink-200 flex flex-col items-center justify-center text-center px-4">
+      <h1 className="text-4xl font-extrabold text-gray-800 mb-4">
+        🎉 Welcome to Ddos Kitchen Admin Panel
+      </h1>
+      <p className="text-lg text-gray-600 mb-8">
+        You are successfully logged in!
+      </p>
+      <button
+        onClick={handleLogout}
+        className="bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-lg shadow"
+      >
+        Logout
+      </button>
     </div>
   );
 };
