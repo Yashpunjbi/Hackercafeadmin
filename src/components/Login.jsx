@@ -1,20 +1,20 @@
 import React, { useState } from "react";
-import { signInWithEmailAndPassword } from "firebase/auth";
-import { auth } from "../firebase";
-import { useNavigate } from "react-router-dom"; // 👈 import navigate
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext"; // ✅ use context
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-  const navigate = useNavigate(); // 👈 init navigate
+  const { login } = useAuth(); // ✅ context se login
+  const navigate = useNavigate();
 
   const handleLogin = async (e) => {
     e.preventDefault();
     setError("");
     try {
-      await signInWithEmailAndPassword(auth, email, password);
-      navigate("/"); // 👈 redirect to dashboard after login
+      await login(email, password); // ✅ context ke through login
+      navigate("/"); // ✅ Dashboard redirect
     } catch (err) {
       setError("Invalid email or password.");
     }
