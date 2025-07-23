@@ -3,7 +3,7 @@ import React from "react";
 const Sidebar = ({ setPage }) => {
   return (
     <div className="bg-white w-64 p-4 shadow h-full">
-      <h1 className="text-2xl font-bold text-pink-600 mb-6">Bakchodi Admin</h1>
+      <h1 className="text-2xl font-bold text-pink-600 mb-6">hackercafeadmin</h1>
       <ul className="space-y-2">
         <li>
           <button
