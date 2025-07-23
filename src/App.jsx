@@ -1,31 +1,58 @@
-import React from "react";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Login from "./components/Login";
-import Home from "./pages/Home";
-import { AuthProvider, useAuth } from "./context/AuthContext";
+import React, { useState } from "react";
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { auth } from "../firebase";
+import { useNavigate } from "react-router-dom";
 
-const ProtectedRoute = ({ children }) => {
-  const { user } = useAuth();
-  return user ? children : <Login />;
-};
+const Login = () => {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const navigate = useNavigate();
 
-const App = () => {
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    setError("");
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+      navigate("/"); // ✅ Dashboard (Home.jsx) pe jao
+    } catch (err) {
+      setError("Invalid email or password.");
+    }
+  };
+
   return (
-    <AuthProvider>
-      <BrowserRouter>
-        <Routes>
-          <Route
-            path="/"
-            element={
-              <ProtectedRoute>
-                <Home />
-              </ProtectedRoute>
-            }
-          />
-        </Routes>
-      </BrowserRouter>
-    </AuthProvider>
+    <div className="flex items-center justify-center h-screen bg-gray-100">
+      <form
+        onSubmit={handleLogin}
+        className="bg-white p-8 rounded-lg shadow-md w-80"
+      >
+        <h2 className="text-2xl font-semibold mb-4 text-center">Admin Login</h2>
+        {error && <p className="text-red-500 text-sm mb-2">{error}</p>}
+        <input
+          type="email"
+          placeholder="Email"
+          className="w-full mb-3 p-2 border rounded"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          required
+        />
+        <input
+          type="password"
+          placeholder="Password"
+          className="w-full mb-3 p-2 border rounded"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          required
+        />
+        <button
+          type="submit"
+          className="w-full bg-black text-white py-2 rounded hover:bg-gray-800"
+        >
+          Login
+        </button>
+      </form>
+    </div>
   );
 };
 
-export default App;
+export default Login;
