@@ -1,37 +1,45 @@
-import { createContext, useContext, useEffect, useState } from "react";
-import { onAuthStateChanged, signInWithEmailAndPassword, signOut } from "firebase/auth";
-import { auth } from "../firebase";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { useAuth } from "./context/AuthContext";
+import Dashboard from "./components/Dashboard";
+import Orders from "./components/Orders";
+import Login from "./components/Login";
+import Sidebar from "./components/Sidebar";
+import Topbar from "./components/Topbar";
 
-const AuthContext = createContext();
+function App() {
+  const { user } = useAuth();
 
-export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
-
-  // ✅ LOGIN function
-  const login = (email, password) => {
-    return signInWithEmailAndPassword(auth, email, password);
+  const PrivateRoute = ({ children }) => {
+    return user ? children : <Navigate to="/login" />;
   };
-
-  // ✅ LOGOUT function (optional)
-  const logout = () => {
-    return signOut(auth);
-  };
-
-  // ✅ Check current user
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setUser(user);
-      setLoading(false);
-    });
-    return () => unsubscribe();
-  }, []);
 
   return (
-    <AuthContext.Provider value={{ user, login, logout }}>
-      {!loading && children}
-    </AuthContext.Provider>
+    <BrowserRouter>
+      {user && <Sidebar />}
+      <div className="flex flex-col flex-1">
+        {user && <Topbar />}
+        <Routes>
+          <Route path="/login" element={<Login />} />
+          <Route
+            path="/"
+            element={
+              <PrivateRoute>
+                <Dashboard />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/orders"
+            element={
+              <PrivateRoute>
+                <Orders />
+              </PrivateRoute>
+            }
+          />
+        </Routes>
+      </div>
+    </BrowserRouter>
   );
-};
+}
 
-export const useAuth = () => useContext(AuthContext);
+export default App;
