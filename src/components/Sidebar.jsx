@@ -4,7 +4,10 @@ import { Link } from "react-router-dom";
 
 const Sidebar = () => {
   return (
-    <div className="bg-gray-900 text-white w-64 min-h-screen px-4 py-6">
+    <div className="bg-gray-900 text-white min-h-screen w-64 hidden sm:block">
+  {/* Sidebar */}
+
+</div>
       <h1 className="text-2xl font-bold mb-6">🍔 hacker cafe</h1>
       <ul className="space-y-4">
         <li>
