@@ -17,7 +17,6 @@ function App() {
     <BrowserRouter>
       {user && (isMobile ? <Navbar /> : <Topbar />)}
       <div className="flex flex-col flex-1">
-      
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route
