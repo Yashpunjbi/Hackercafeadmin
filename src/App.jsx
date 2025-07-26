@@ -3,7 +3,7 @@ import { useAuth } from "./context/AuthContext";
 import Dashboard from "./components/Dashboard";
 import Orders from "./components/Orders";
 import Login from "./components/Login";
-import Sidebar from "./components/Sidebar";
+import Sidebar from "./components/Navbar";
 import Topbar from "./components/Topbar";
 
 function App() {
