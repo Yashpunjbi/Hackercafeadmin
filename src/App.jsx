@@ -16,9 +16,9 @@ function App() {
 
   return (
     <BrowserRouter>
-      {user && <Navbar />}
+      {user && (isMobile ? <Navbar /> : <Topbar />)}
       <div className="flex flex-col flex-1">
-        {user && <Topbar />}
+      
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route
