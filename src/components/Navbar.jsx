@@ -1,16 +1,30 @@
 // src/components/Navbar.jsx
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 
 const Navbar = () => {
+  const location = useLocation();
+
+  const getActiveClass = (path) =>
+    location.pathname === path ? "text-yellow-400" : "text-white";
+
   return (
-    <nav className="bg-gray-900 text-white px-4 py-3 flex items-center justify-between shadow-md">
-      <div className="text-xl font-bold">🍔 Hacker Cafe</div>
-      <div className="flex space-x-6">
-        <Link to="/" className="hover:text-yellow-400">Dashboard</Link>
-        <Link to="/orders" className="hover:text-yellow-400">Orders</Link>
-        <Link to="/products" className="hover:text-yellow-400">Products</Link>
-      </div>
+    <nav className="fixed bottom-0 left-0 right-0 bg-gray-900 text-white px-4 py-3 flex justify-around shadow-lg z-50">
+      <Link to="/" className={`${getActiveClass("/")} text-sm font-semibold`}>
+        Dashboard
+      </Link>
+      <Link
+        to="/orders"
+        className={`${getActiveClass("/orders")} text-sm font-semibold`}
+      >
+        Orders
+      </Link>
+      <Link
+        to="/products"
+        className={`${getActiveClass("/products")} text-sm font-semibold`}
+      >
+        Products
+      </Link>
     </nav>
   );
 };
