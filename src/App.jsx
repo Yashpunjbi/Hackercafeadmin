@@ -7,6 +7,7 @@ import Navbar from "./components/Navbar";
 import Topbar from "./components/Topbar";
 import useIsMobile from "./hooks/useIsMobile";
 function App() {
+
   const { user } = useAuth();
   const isMobile = useIsMobile();
   const PrivateRoute = ({ children }) => {
