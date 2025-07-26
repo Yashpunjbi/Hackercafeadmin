@@ -12,6 +12,7 @@ const Login = () => {
     try {
       await login(email, password);
     } catch (err) {
+      console.log("❌ Login Error:", err.message); // ✅ Just added this line
       setError("Invalid email or password");
     }
   };
