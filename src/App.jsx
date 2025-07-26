@@ -5,10 +5,11 @@ import Orders from "./components/Orders";
 import Login from "./components/Login";
 import Navbar from "./components/Navbar";
 import Topbar from "./components/Topbar";
+import useIsMobile from "./hooks/useIsMobile";
 
 function App() {
   const { user } = useAuth();
-
+  const isMobile = useIsMobile();
   const PrivateRoute = ({ children }) => {
     return user ? children : <Navigate to="/login" />;
   };
