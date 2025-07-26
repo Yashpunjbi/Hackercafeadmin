@@ -1,8 +1,10 @@
 import React, { useState } from "react";
 import { useAuth } from "../context/AuthContext";
+import { useNavigate } from "react-router-dom"; // ✅ Add this
 
 const Login = () => {
   const { login } = useAuth();
+  const navigate = useNavigate(); // ✅ Add this
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -11,8 +13,9 @@ const Login = () => {
     e.preventDefault();
     try {
       await login(email, password);
+      navigate("/"); // ✅ Redirect on success
     } catch (err) {
-      console.log("❌ Login Error:", err.message); // ✅ Just added this line
+      console.log("❌ Login Error:", err.message);
       setError("Invalid email or password");
     }
   };
