@@ -15,7 +15,7 @@ function App() {
 
   return (
     <BrowserRouter>
-      {user && <Sidebar />}
+      {user && <Navbar />}
       <div className="flex flex-col flex-1">
         {user && <Topbar />}
         <Routes>
