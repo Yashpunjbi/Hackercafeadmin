@@ -2,14 +2,16 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { useAuth } from "./context/AuthContext";
 import Dashboard from "./components/Dashboard";
 import Orders from "./components/Orders";
+import Products from "./components/Products"; // ✅ New line
 import Login from "./components/Login";
 import Navbar from "./components/Navbar";
 import Topbar from "./components/Topbar";
 import useIsMobile from "./hooks/useIsMobile";
-function App() {
 
+function App() {
   const { user } = useAuth();
   const isMobile = useIsMobile();
+
   const PrivateRoute = ({ children }) => {
     return user ? children : <Navigate to="/login" />;
   };
@@ -33,6 +35,14 @@ function App() {
             element={
               <PrivateRoute>
                 <Orders />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/products" // ✅ New route
+            element={
+              <PrivateRoute>
+                <Products />
               </PrivateRoute>
             }
           />
