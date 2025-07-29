@@ -25,6 +25,12 @@ const Navbar = () => {
       >
         Products
       </Link>
+      <Link
+        to="/offersadmin"
+        className={`${getActiveClass("/offersadmin")} text-sm font-semibold`}
+      >
+        Offers
+      </Link> {/* ✅ Add this */}
     </nav>
   );
 };
