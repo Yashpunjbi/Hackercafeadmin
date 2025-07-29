@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { db } from "../firebase";
 import {
@@ -33,7 +32,7 @@ const OffersAdmin = () => {
     try {
       await addDoc(collection(db, "offers"), {
         title,
-        imageUrl,
+        image: imageUrl,  // ✅ Correct field name for customer site
         price,
       });
       setTitle("");
@@ -93,7 +92,7 @@ const OffersAdmin = () => {
             className="border rounded-lg p-4 flex flex-col items-center"
           >
             <img
-              src={offer.imageUrl}
+              src={offer.image || offer.imageUrl}
               alt={offer.title}
               className="w-full h-40 object-cover rounded"
             />
