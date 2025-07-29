@@ -2,11 +2,12 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { useAuth } from "./context/AuthContext";
 import Dashboard from "./components/Dashboard";
 import Orders from "./components/Orders";
-import Products from "./components/Products"; // ✅ New line
+import Products from "./components/Products";
 import Login from "./components/Login";
 import Navbar from "./components/Navbar";
 import Topbar from "./components/Topbar";
 import useIsMobile from "./hooks/useIsMobile";
+import OffersAdmin from "./pages/OffersAdmin"; // ✅ Already imported
 
 function App() {
   const { user } = useAuth();
@@ -39,10 +40,18 @@ function App() {
             }
           />
           <Route
-            path="/products" // ✅ New route
+            path="/products"
             element={
               <PrivateRoute>
                 <Products />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/offersadmin" // ✅ NEW ROUTE
+            element={
+              <PrivateRoute>
+                <OffersAdmin />
               </PrivateRoute>
             }
           />
