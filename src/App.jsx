@@ -7,7 +7,7 @@ import Login from "./components/Login";
 import Navbar from "./components/Navbar";
 import Topbar from "./components/Topbar";
 import useIsMobile from "./hooks/useIsMobile";
-import OffersAdmin from "./pages/OffersAdmin"; // ✅ Already imported
+import OffersAdmin from "./components/OffersAdmin"; // ✅ Already imported
 
 function App() {
   const { user } = useAuth();
