@@ -23,6 +23,14 @@ const Orders = () => {
     await updateDoc(orderRef, { status: newStatus });
   };
 
+  const statusOptions = [
+    "placed",
+    "preparing",
+    "out_for_delivery",
+    "delivered",
+    "cancelled",
+  ];
+
   return (
     <div className="p-6">
       <h2 className="text-2xl font-bold mb-4">🧾 Orders</h2>
@@ -39,7 +47,6 @@ const Orders = () => {
                 <th className="py-2 px-4">Address</th>
                 <th className="py-2 px-4">Items</th>
                 <th className="py-2 px-4">Status</th>
-                <th className="py-2 px-4">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -55,20 +62,18 @@ const Orders = () => {
                       </div>
                     ))}
                   </td>
-                  <td className="py-2 px-4 font-semibold capitalize">{order.status || "pending"}</td>
-                  <td className="py-2 px-4">
-                    <button
-                      onClick={() => handleStatusUpdate(order.id, "completed")}
-                      className="bg-green-500 hover:bg-green-600 text-white text-sm px-3 py-1 rounded mr-2"
+                  <td className="py-2 px-4 font-semibold capitalize">
+                    <select
+                      value={order.status || "placed"}
+                      onChange={(e) => handleStatusUpdate(order.id, e.target.value)}
+                      className="border px-2 py-1 rounded bg-white"
                     >
-                      Complete
-                    </button>
-                    <button
-                      onClick={() => handleStatusUpdate(order.id, "cancelled")}
-                      className="bg-red-500 hover:bg-red-600 text-white text-sm px-3 py-1 rounded"
-                    >
-                      Cancel
-                    </button>
+                      {statusOptions.map((status) => (
+                        <option key={status} value={status}>
+                          {status.replace(/_/g, " ")}
+                        </option>
+                      ))}
+                    </select>
                   </td>
                 </tr>
               ))}
