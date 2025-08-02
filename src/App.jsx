@@ -7,7 +7,9 @@ import Login from "./components/Login";
 import Navbar from "./components/Navbar";
 import Topbar from "./components/Topbar";
 import useIsMobile from "./hooks/useIsMobile";
-import OffersAdmin from "./components/OffersAdmin"; // ✅ Already imported
+import OffersAdmin from "./components/OffersAdmin";
+import BannersAdmin from "./components/BannersAdmin"; // ✅ NEW
+import CategoriesAdmin from "./components/CategoriesAdmin"; // ✅ NEW
 
 function App() {
   const { user } = useAuth();
@@ -48,10 +50,26 @@ function App() {
             }
           />
           <Route
-            path="/offersadmin" // ✅ NEW ROUTE
+            path="/offersadmin"
             element={
               <PrivateRoute>
                 <OffersAdmin />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/bannersadmin" // ✅ NEW
+            element={
+              <PrivateRoute>
+                <BannersAdmin />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/categoriesadmin" // ✅ NEW
+            element={
+              <PrivateRoute>
+                <CategoriesAdmin />
               </PrivateRoute>
             }
           />
