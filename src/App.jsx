@@ -8,8 +8,8 @@ import Navbar from "./components/Navbar";
 import Topbar from "./components/Topbar";
 import useIsMobile from "./hooks/useIsMobile";
 import OffersAdmin from "./components/OffersAdmin";
-import BannersAdmin from "./components/BannersAdmin"; // ✅ NEW
-import CategoriesAdmin from "./components/CategoriesAdmin"; // ✅ NEW
+import BannersAdmin from "./components/BannersAdmin";
+import CategoriesAdmin from "./components/CategoriesAdmin";
 
 function App() {
   const { user } = useAuth();
@@ -22,9 +22,11 @@ function App() {
   return (
     <BrowserRouter>
       {user && (isMobile ? <Navbar /> : <Topbar />)}
-      <div className="flex flex-col flex-1">
+
+      <div className="flex flex-col p-4">
         <Routes>
           <Route path="/login" element={<Login />} />
+
           <Route
             path="/"
             element={
@@ -33,6 +35,7 @@ function App() {
               </PrivateRoute>
             }
           />
+
           <Route
             path="/orders"
             element={
@@ -41,6 +44,7 @@ function App() {
               </PrivateRoute>
             }
           />
+
           <Route
             path="/products"
             element={
@@ -49,6 +53,7 @@ function App() {
               </PrivateRoute>
             }
           />
+
           <Route
             path="/offersadmin"
             element={
@@ -57,16 +62,18 @@ function App() {
               </PrivateRoute>
             }
           />
+
           <Route
-            path="/bannersadmin" // ✅ NEW
+            path="/bannersadmin"
             element={
               <PrivateRoute>
                 <BannersAdmin />
               </PrivateRoute>
             }
           />
+
           <Route
-            path="/categoriesadmin" // ✅ NEW
+            path="/categoriesadmin"
             element={
               <PrivateRoute>
                 <CategoriesAdmin />
