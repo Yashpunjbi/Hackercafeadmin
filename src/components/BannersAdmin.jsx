@@ -1,58 +1,60 @@
+// src/components/BannerAdmin.jsx
 import React, { useEffect, useState } from "react";
 import { db } from "../firebase";
-import { collection, addDoc, deleteDoc, doc, getDocs } from "firebase/firestore";
+import { collection, onSnapshot, deleteDoc, doc } from "firebase/firestore";
 
-const Banners = () => {
+const BannerAdmin = () => {
   const [banners, setBanners] = useState([]);
-  const [image, setImage] = useState("");
 
-  const fetchBanners = async () => {
-    const snap = await getDocs(collection(db, "banners"));
-    const data = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-    setBanners(data);
-  };
+  useEffect(() => {
+    const unsubscribe = onSnapshot(collection(db, "banners"), (snapshot) => {
+      const bannerData = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      setBanners(bannerData);
+    });
 
-  const handleAdd = async () => {
-    if (!image) return;
-    await addDoc(collection(db, "banners"), { image });
-    setImage("");
-    fetchBanners();
-  };
+    return () => unsubscribe();
+  }, []);
 
   const handleDelete = async (id) => {
     await deleteDoc(doc(db, "banners", id));
-    fetchBanners();
   };
-
-  useEffect(() => {
-    fetchBanners();
-  }, []);
 
   return (
     <div className="p-4">
-      <h2 className="text-xl font-bold mb-4">Manage Banners</h2>
-
-      <div className="flex gap-2 mb-4">
-        <input
-          type="text"
-          placeholder="Image URL"
-          value={image}
-          onChange={(e) => setImage(e.target.value)}
-          className="border px-2 py-1 rounded w-full"
-        />
-        <button onClick={handleAdd} className="bg-blue-500 text-white px-4 py-1 rounded">Add</button>
-      </div>
-
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        {banners.map((item) => (
-          <div key={item.id} className="relative">
-            <img src={item.image} alt="banner" className="rounded-lg h-24 w-full object-cover" />
-            <button onClick={() => handleDelete(item.id)} className="absolute top-1 right-1 bg-red-500 text-white px-2 rounded">X</button>
-          </div>
-        ))}
-      </div>
+      <h2 className="text-xl font-bold mb-4">Banners</h2>
+      {banners.length === 0 ? (
+        <p className="text-gray-400">No banners found.</p>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+          {banners.map((banner) => (
+            <div
+              key={banner.id}
+              className="bg-white rounded-lg shadow p-4 border"
+            >
+              <img
+                src={banner.image}
+                alt={banner.title}
+                className="w-full h-32 object-cover rounded"
+              />
+              <h3 className="mt-2 font-semibold text-lg">{banner.title}</h3>
+              <p className="text-sm text-gray-500">
+                Active: {banner.active ? "Yes" : "No"}
+              </p>
+              <button
+                onClick={() => handleDelete(banner.id)}
+                className="mt-2 bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
+              >
+                Delete
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 };
 
-export default Banners;
+export default BannerAdmin;
