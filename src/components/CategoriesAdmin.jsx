@@ -1,67 +1,60 @@
+// src/components/CategoryAdmin.jsx
 import React, { useEffect, useState } from "react";
 import { db } from "../firebase";
-import { collection, addDoc, deleteDoc, doc, getDocs } from "firebase/firestore";
+import { collection, onSnapshot, deleteDoc, doc } from "firebase/firestore";
 
-const Categories = () => {
+const CategoryAdmin = () => {
   const [categories, setCategories] = useState([]);
-  const [name, setName] = useState("");
-  const [image, setImage] = useState("");
 
-  const fetchCategories = async () => {
-    const snap = await getDocs(collection(db, "categories"));
-    const data = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-    setCategories(data);
-  };
+  useEffect(() => {
+    const unsubscribe = onSnapshot(collection(db, "categories"), (snapshot) => {
+      const catData = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      setCategories(catData);
+    });
 
-  const handleAdd = async () => {
-    if (!name || !image) return;
-    await addDoc(collection(db, "categories"), { name, image });
-    setName(""); setImage("");
-    fetchCategories();
-  };
+    return () => unsubscribe();
+  }, []);
 
   const handleDelete = async (id) => {
     await deleteDoc(doc(db, "categories", id));
-    fetchCategories();
   };
-
-  useEffect(() => {
-    fetchCategories();
-  }, []);
 
   return (
     <div className="p-4">
-      <h2 className="text-xl font-bold mb-4">Manage Categories</h2>
-
-      <div className="flex flex-col sm:flex-row gap-2 mb-4">
-        <input
-          type="text"
-          placeholder="Category Name"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          className="border px-2 py-1 rounded w-full"
-        />
-        <input
-          type="text"
-          placeholder="Image URL"
-          value={image}
-          onChange={(e) => setImage(e.target.value)}
-          className="border px-2 py-1 rounded w-full"
-        />
-        <button onClick={handleAdd} className="bg-green-500 text-white px-4 py-1 rounded">Add</button>
-      </div>
-
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        {categories.map((cat) => (
-          <div key={cat.id} className="relative text-center">
-            <img src={cat.image} alt={cat.name} className="rounded-full h-16 w-16 mx-auto object-cover" />
-            <p className="text-sm mt-1">{cat.name}</p>
-            <button onClick={() => handleDelete(cat.id)} className="absolute top-1 right-1 bg-red-500 text-white px-2 rounded">X</button>
-          </div>
-        ))}
-      </div>
+      <h2 className="text-xl font-bold mb-4">Categories</h2>
+      {categories.length === 0 ? (
+        <p className="text-gray-400">No categories found.</p>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+          {categories.map((cat) => (
+            <div
+              key={cat.id}
+              className="bg-white rounded-lg shadow p-4 border"
+            >
+              <img
+                src={cat.image}
+                alt={cat.name}
+                className="w-full h-32 object-cover rounded"
+              />
+              <h3 className="mt-2 font-semibold text-lg">{cat.name}</h3>
+              <p className="text-sm text-gray-500">
+                Active: {cat.active ? "Yes" : "No"}
+              </p>
+              <button
+                onClick={() => handleDelete(cat.id)}
+                className="mt-2 bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
+              >
+                Delete
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 };
 
-export default Categories;
+export default CategoryAdmin;
