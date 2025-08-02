@@ -1,4 +1,3 @@
-// src/components/BannerAdmin.jsx
 import React, { useEffect, useState } from "react";
 import { db } from "../firebase";
 import { collection, onSnapshot, deleteDoc, doc } from "firebase/firestore";
@@ -7,7 +6,7 @@ const BannerAdmin = () => {
   const [banners, setBanners] = useState([]);
 
   useEffect(() => {
-    const unsub = onSnapshot(collection(db, "banners"), (snapshot) => {
+    const unsub = onSnapshot(collection(db, "Banners"), (snapshot) => {
       const data = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
       setBanners(data);
     });
@@ -16,7 +15,7 @@ const BannerAdmin = () => {
 
   const handleDelete = async (id) => {
     if (window.confirm("Are you sure you want to delete this banner?")) {
-      await deleteDoc(doc(db, "banners", id));
+      await deleteDoc(doc(db, "Banners", id));
     }
   };
 
@@ -31,7 +30,8 @@ const BannerAdmin = () => {
               alt="Banner"
               className="w-full h-40 object-cover rounded"
             />
-            <p className="mt-2 font-medium">{banner.name || "No Title"}</p>
+            <p className="mt-2 font-medium">{banner.title || "No Title"}</p>
+            <p className="text-sm text-gray-500">{banner.Subtitle}</p>
             <button
               onClick={() => handleDelete(banner.id)}
               className="mt-2 px-3 py-1 bg-red-500 text-white text-sm rounded"
