@@ -1,48 +1,44 @@
 import React, { useEffect, useState } from "react";
 import { db } from "../firebase";
-import { collection, onSnapshot, deleteDoc, doc } from "firebase/firestore";
+import { collection, getDocs, doc, setDoc } from "firebase/firestore";
 
-const BannerAdmin = () => {
-  const [banners, setBanners] = useState([]);
+const BannerForm = () => {
+  const [image, setImage] = useState("");
 
   useEffect(() => {
-    const unsub = onSnapshot(collection(db, "Banners"), (snapshot) => {
-      const data = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-      setBanners(data);
-    });
-    return () => unsub();
+    const fetchBanner = async () => {
+      const snap = await getDocs(collection(db, "banner"));
+      snap.forEach((doc) => setImage(doc.data().image));
+    };
+    fetchBanner();
   }, []);
 
-  const handleDelete = async (id) => {
-    if (window.confirm("Are you sure you want to delete this banner?")) {
-      await deleteDoc(doc(db, "Banners", id));
-    }
+  const handleUpdate = async () => {
+    const bannerRef = doc(db, "banner", "main");
+    await setDoc(bannerRef, { image });
+    alert("✅ Banner updated successfully!");
   };
 
   return (
-    <div className="p-4">
-      <h2 className="text-xl font-bold mb-4">All Banners</h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {banners.map((banner) => (
-          <div key={banner.id} className="border rounded p-4 shadow">
-            <img
-              src={banner.image}
-              alt="Banner"
-              className="w-full h-40 object-cover rounded"
-            />
-            <p className="mt-2 font-medium">{banner.title || "No Title"}</p>
-            <p className="text-sm text-gray-500">{banner.Subtitle}</p>
-            <button
-              onClick={() => handleDelete(banner.id)}
-              className="mt-2 px-3 py-1 bg-red-500 text-white text-sm rounded"
-            >
-              Delete
-            </button>
-          </div>
-        ))}
-      </div>
+    <div className="bg-white p-4 rounded-xl shadow space-y-3">
+      <input
+        type="text"
+        className="w-full border rounded p-2"
+        placeholder="Banner Image URL"
+        value={image}
+        onChange={(e) => setImage(e.target.value)}
+      />
+      {image && (
+        <img src={image} alt="Banner" className="w-full rounded-lg shadow" />
+      )}
+      <button
+        onClick={handleUpdate}
+        className="bg-pink-600 text-white px-4 py-2 rounded hover:bg-pink-700"
+      >
+        Save Banner
+      </button>
     </div>
   );
 };
 
-export default BannerAdmin;
+export default BannerForm;
