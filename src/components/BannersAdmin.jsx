@@ -1,44 +1,47 @@
+// src/components/BannerAdmin.jsx
+
 import React, { useEffect, useState } from "react";
 import { db } from "../firebase";
-import { collection, getDocs, doc, setDoc } from "firebase/firestore";
+import { collection, onSnapshot, deleteDoc, doc } from "firebase/firestore";
 
-const BannerForm = () => {
-  const [image, setImage] = useState("");
+const BannerAdmin = () => {
+  const [banners, setBanners] = useState([]);
 
   useEffect(() => {
-    const fetchBanner = async () => {
-      const snap = await getDocs(collection(db, "banner"));
-      snap.forEach((doc) => setImage(doc.data().image));
-    };
-    fetchBanner();
+    const unsub = onSnapshot(collection(db, "banner"), (snapshot) => {
+      setBanners(snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })));
+    });
+
+    return () => unsub();
   }, []);
 
-  const handleUpdate = async () => {
-    const bannerRef = doc(db, "banner", "main");
-    await setDoc(bannerRef, { image });
-    alert("✅ Banner updated successfully!");
+  const deleteBanner = async (id) => {
+    await deleteDoc(doc(db, "banner", id));
   };
 
   return (
-    <div className="bg-white p-4 rounded-xl shadow space-y-3">
-      <input
-        type="text"
-        className="w-full border rounded p-2"
-        placeholder="Banner Image URL"
-        value={image}
-        onChange={(e) => setImage(e.target.value)}
-      />
-      {image && (
-        <img src={image} alt="Banner" className="w-full rounded-lg shadow" />
+    <div className="p-6">
+      <h2 className="text-2xl font-bold mb-4">Manage Banners</h2>
+      {banners.length === 0 ? (
+        <p className="text-gray-500">No banners found.</p>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {banners.map((banner) => (
+            <div key={banner.id} className="bg-white rounded shadow p-4">
+              <img src={banner.imageUrl} alt={banner.title} className="w-full h-40 object-cover rounded" />
+              <p className="mt-2 font-semibold">{banner.title}</p>
+              <button
+                className="mt-2 px-4 py-1 bg-red-500 text-white rounded"
+                onClick={() => deleteBanner(banner.id)}
+              >
+                Delete
+              </button>
+            </div>
+          ))}
+        </div>
       )}
-      <button
-        onClick={handleUpdate}
-        className="bg-pink-600 text-white px-4 py-2 rounded hover:bg-pink-700"
-      >
-        Save Banner
-      </button>
     </div>
   );
 };
 
-export default BannerForm;
+export default BannerAdmin;
