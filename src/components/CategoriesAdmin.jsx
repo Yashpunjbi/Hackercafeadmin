@@ -1,42 +1,86 @@
-// src/components/CategoryAdmin.jsx
 import React, { useEffect, useState } from "react";
+import {
+  collection,
+  addDoc,
+  getDocs,
+  deleteDoc,
+  doc,
+} from "firebase/firestore";
 import { db } from "../firebase";
-import { collection, onSnapshot, deleteDoc, doc } from "firebase/firestore";
 
-const CategoryAdmin = () => {
+const CategoryManager = () => {
+  const [title, setTitle] = useState("");
+  const [image, setImage] = useState("");
   const [categories, setCategories] = useState([]);
 
+  const fetchCategories = async () => {
+    const snap = await getDocs(collection(db, "categories"));
+    const items = [];
+    snap.forEach((doc) =>
+      items.push({ id: doc.id, ...doc.data() })
+    );
+    setCategories(items);
+  };
+
   useEffect(() => {
-    const unsub = onSnapshot(collection(db, "categories"), (snapshot) => {
-      const data = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-      setCategories(data);
-    });
-    return () => unsub();
+    fetchCategories();
   }, []);
 
+  const handleAdd = async () => {
+    if (!title || !image) return alert("Please fill both fields");
+    await addDoc(collection(db, "categories"), { title, image });
+    setTitle("");
+    setImage("");
+    fetchCategories();
+  };
+
   const handleDelete = async (id) => {
-    if (window.confirm("Are you sure you want to delete this category?")) {
-      await deleteDoc(doc(db, "categories", id));
-    }
+    await deleteDoc(doc(db, "categories", id));
+    fetchCategories();
   };
 
   return (
-    <div className="p-4">
-      <h2 className="text-xl font-bold mb-4">All Categories</h2>
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+    <div className="bg-white p-4 rounded-xl shadow space-y-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+        <input
+          type="text"
+          className="border rounded p-2"
+          placeholder="Category Title"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+        />
+        <input
+          type="text"
+          className="border rounded p-2"
+          placeholder="Category Image URL"
+          value={image}
+          onChange={(e) => setImage(e.target.value)}
+        />
+      </div>
+      <button
+        onClick={handleAdd}
+        className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+      >
+        ➕ Add Category
+      </button>
+
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-4">
         {categories.map((cat) => (
-          <div key={cat.id} className="border rounded p-3 text-center shadow">
+          <div
+            key={cat.id}
+            className="border p-3 rounded-xl text-center relative bg-gray-50"
+          >
             <img
               src={cat.image}
-              alt={cat.name}
-              className="w-24 h-24 object-cover mx-auto rounded-full"
+              alt={cat.title}
+              className="w-16 h-16 mx-auto rounded-full object-cover mb-2"
             />
-            <p className="mt-2 font-semibold">{cat.name}</p>
+            <p className="font-semibold">{cat.title}</p>
             <button
               onClick={() => handleDelete(cat.id)}
-              className="mt-2 px-3 py-1 bg-red-500 text-white text-sm rounded"
+              className="text-red-500 mt-2 text-sm"
             >
-              Delete
+              ❌ Delete
             </button>
           </div>
         ))}
@@ -45,4 +89,4 @@ const CategoryAdmin = () => {
   );
 };
 
-export default CategoryAdmin;
+export default CategoryManager;
