@@ -1,37 +1,46 @@
 import React, { useEffect, useState } from "react";
+import { db } from "../firebase";
 import {
   collection,
   addDoc,
   getDocs,
+  updateDoc,
   deleteDoc,
   doc,
 } from "firebase/firestore";
-import { db } from "../firebase";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 
 const CategoryManager = () => {
-  const [title, setTitle] = useState("");
-  const [image, setImage] = useState("");
   const [categories, setCategories] = useState([]);
-
-  const fetchCategories = async () => {
-    const snap = await getDocs(collection(db, "categories"));
-    const items = [];
-    snap.forEach((doc) =>
-      items.push({ id: doc.id, ...doc.data() })
-    );
-    setCategories(items);
-  };
+  const [newCategory, setNewCategory] = useState({ name: "", image: "" });
+  const [editingId, setEditingId] = useState(null);
 
   useEffect(() => {
     fetchCategories();
   }, []);
 
-  const handleAdd = async () => {
-    if (!title || !image) return alert("Please fill both fields");
-    await addDoc(collection(db, "categories"), { title, image });
-    setTitle("");
-    setImage("");
+  const fetchCategories = async () => {
+    const snap = await getDocs(collection(db, "categories"));
+    const list = snap.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+    setCategories(list);
+  };
+
+  const handleSubmit = async () => {
+    if (!newCategory.name || !newCategory.image) return alert("All fields required");
+    if (editingId) {
+      await updateDoc(doc(db, "categories", editingId), newCategory);
+    } else {
+      await addDoc(collection(db, "categories"), newCategory);
+    }
+    setNewCategory({ name: "", image: "" });
+    setEditingId(null);
     fetchCategories();
+  };
+
+  const handleEdit = (cat) => {
+    setNewCategory({ name: cat.name, image: cat.image });
+    setEditingId(cat.id);
   };
 
   const handleDelete = async (id) => {
@@ -40,48 +49,32 @@ const CategoryManager = () => {
   };
 
   return (
-    <div className="bg-white p-4 rounded-xl shadow space-y-4">
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-        <input
-          type="text"
-          className="border rounded p-2"
-          placeholder="Category Title"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
+    <div className="p-6">
+      <h2 className="text-xl font-bold mb-4">Manage Categories</h2>
+      <div className="flex gap-2 mb-4">
+        <Input
+          placeholder="Category Name"
+          value={newCategory.name}
+          onChange={(e) => setNewCategory({ ...newCategory, name: e.target.value })}
         />
-        <input
-          type="text"
-          className="border rounded p-2"
-          placeholder="Category Image URL"
-          value={image}
-          onChange={(e) => setImage(e.target.value)}
+        <Input
+          placeholder="Image URL"
+          value={newCategory.image}
+          onChange={(e) => setNewCategory({ ...newCategory, image: e.target.value })}
         />
+        <Button onClick={handleSubmit}>
+          {editingId ? "Update" : "Add"}
+        </Button>
       </div>
-      <button
-        onClick={handleAdd}
-        className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
-      >
-        ➕ Add Category
-      </button>
-
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {categories.map((cat) => (
-          <div
-            key={cat.id}
-            className="border p-3 rounded-xl text-center relative bg-gray-50"
-          >
-            <img
-              src={cat.image}
-              alt={cat.title}
-              className="w-16 h-16 mx-auto rounded-full object-cover mb-2"
-            />
-            <p className="font-semibold">{cat.title}</p>
-            <button
-              onClick={() => handleDelete(cat.id)}
-              className="text-red-500 mt-2 text-sm"
-            >
-              ❌ Delete
-            </button>
+          <div key={cat.id} className="border p-3 rounded-md shadow">
+            <img src={cat.image} alt={cat.name} className="h-24 w-full object-cover rounded" />
+            <h4 className="mt-2 font-semibold text-center">{cat.name}</h4>
+            <div className="flex justify-center mt-2 gap-2">
+              <Button onClick={() => handleEdit(cat)} size="sm">Edit</Button>
+              <Button onClick={() => handleDelete(cat.id)} size="sm" variant="destructive">Delete</Button>
+            </div>
           </div>
         ))}
       </div>
