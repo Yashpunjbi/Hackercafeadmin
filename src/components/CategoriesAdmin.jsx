@@ -1,85 +1,47 @@
+// src/components/CategoriesAdmin.jsx
+
 import React, { useEffect, useState } from "react";
 import { db } from "../firebase";
-import {
-  collection,
-  addDoc,
-  getDocs,
-  updateDoc,
-  deleteDoc,
-  doc,
-} from "firebase/firestore";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+import { collection, onSnapshot, deleteDoc, doc } from "firebase/firestore";
 
-const CategoryManager = () => {
+const CategoriesAdmin = () => {
   const [categories, setCategories] = useState([]);
-  const [newCategory, setNewCategory] = useState({ name: "", image: "" });
-  const [editingId, setEditingId] = useState(null);
 
   useEffect(() => {
-    fetchCategories();
+    const unsub = onSnapshot(collection(db, "categories"), (snapshot) => {
+      setCategories(snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })));
+    });
+
+    return () => unsub();
   }, []);
 
-  const fetchCategories = async () => {
-    const snap = await getDocs(collection(db, "categories"));
-    const list = snap.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-    setCategories(list);
-  };
-
-  const handleSubmit = async () => {
-    if (!newCategory.name || !newCategory.image) return alert("All fields required");
-    if (editingId) {
-      await updateDoc(doc(db, "categories", editingId), newCategory);
-    } else {
-      await addDoc(collection(db, "categories"), newCategory);
-    }
-    setNewCategory({ name: "", image: "" });
-    setEditingId(null);
-    fetchCategories();
-  };
-
-  const handleEdit = (cat) => {
-    setNewCategory({ name: cat.name, image: cat.image });
-    setEditingId(cat.id);
-  };
-
-  const handleDelete = async (id) => {
+  const deleteCategory = async (id) => {
     await deleteDoc(doc(db, "categories", id));
-    fetchCategories();
   };
 
   return (
     <div className="p-6">
-      <h2 className="text-xl font-bold mb-4">Manage Categories</h2>
-      <div className="flex gap-2 mb-4">
-        <Input
-          placeholder="Category Name"
-          value={newCategory.name}
-          onChange={(e) => setNewCategory({ ...newCategory, name: e.target.value })}
-        />
-        <Input
-          placeholder="Image URL"
-          value={newCategory.image}
-          onChange={(e) => setNewCategory({ ...newCategory, image: e.target.value })}
-        />
-        <Button onClick={handleSubmit}>
-          {editingId ? "Update" : "Add"}
-        </Button>
-      </div>
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        {categories.map((cat) => (
-          <div key={cat.id} className="border p-3 rounded-md shadow">
-            <img src={cat.image} alt={cat.name} className="h-24 w-full object-cover rounded" />
-            <h4 className="mt-2 font-semibold text-center">{cat.name}</h4>
-            <div className="flex justify-center mt-2 gap-2">
-              <Button onClick={() => handleEdit(cat)} size="sm">Edit</Button>
-              <Button onClick={() => handleDelete(cat.id)} size="sm" variant="destructive">Delete</Button>
+      <h2 className="text-2xl font-bold mb-4">Manage Categories</h2>
+      {categories.length === 0 ? (
+        <p className="text-gray-500">No categories found.</p>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          {categories.map((cat) => (
+            <div key={cat.id} className="bg-white rounded shadow p-4 text-center">
+              <img src={cat.imageUrl} alt={cat.title} className="w-20 h-20 mx-auto object-cover rounded-full" />
+              <p className="mt-2 font-semibold">{cat.title}</p>
+              <button
+                className="mt-2 px-4 py-1 bg-red-500 text-white rounded"
+                onClick={() => deleteCategory(cat.id)}
+              >
+                Delete
+              </button>
             </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 };
 
-export default CategoryManager;
+export default CategoriesAdmin;
