@@ -1,79 +1,108 @@
 import React, { useEffect, useState } from "react";
 import { db } from "../firebase";
-import { collection, addDoc, deleteDoc, doc, getDocs } from "firebase/firestore";
+import {
+  collection,
+  addDoc,
+  getDocs,
+  deleteDoc,
+  doc,
+  updateDoc,
+} from "firebase/firestore";
 
-const Banners = () => {
-  const [banners, setBanners] = useState([]);
-  const [imageUrl, setImageUrl] = useState("");
-  const [altText, setAltText] = useState("");
+const banners = () => {
+  const [banners, setProducts] = useState([]);
+  const [newProduct, setNewProduct] = useState({
+    name: "",
+    price: "",
+    image: "",
+    inStock: true,
+  });
 
-  const fetchBanners = async () => {
-    const querySnapshot = await getDocs(collection(db, "banners"));
-    const items = [];
-    querySnapshot.forEach((doc) => {
-      items.push({ id: doc.id, ...doc.data() });
-    });
-    setBanners(items);
+  const fetchProducts = async () => {
+    const snapshot = await getDocs(collection(db, "banners"));
+    const items = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+    setProducts(items);
   };
 
-  const addBanner = async () => {
-    if (!imageUrl) return;
+  const addProduct = async () => {
     await addDoc(collection(db, "banners"), {
-      imageUrl,
-      altText,
-      active: true,
+      ...newProduct,
+      price: Number(newProduct.price),
     });
-    setImageUrl("");
-    setAltText("");
-    fetchBanners();
+    setNewProduct({ name: "", price: "", image: "", inStock: true });
+    fetchProducts();
   };
 
-  const deleteBanner = async (id) => {
-    await deleteDoc(doc(db, "banners", id));
-    fetchBanners();
+  const deleteProduct = async (id) => {
+    await deleteDoc(doc(db, "products", id));
+    fetchProducts();
+  };
+
+  const toggleStock = async (id, status) => {
+    await updateDoc(doc(db, "products", id), {
+      inStock: !status,
+    });
+    fetchProducts();
   };
 
   useEffect(() => {
-    fetchBanners();
+    fetchProducts();
   }, []);
 
   return (
     <div className="p-4">
-      <h2 className="text-xl font-bold mb-4">Manage Banners</h2>
-
-      <div className="flex gap-2 mb-4">
+      <h2 className="text-xl font-bold mb-4">📦 banner</h2>
+      <div className="space-y-4">
+        <input
+          type="text"
+          placeholder="Name"
+          className="border px-3 py-2"
+          value={newProduct.name}
+          onChange={(e) => setNewProduct({ ...newProduct, name: e.target.value })}
+        />
+        <input
+          type="number"
+          placeholder="Price"
+          className="border px-3 py-2"
+          value={newProduct.price}
+          onChange={(e) => setNewProduct({ ...newProduct, price: e.target.value })}
+        />
         <input
           type="text"
           placeholder="Image URL"
-          className="border p-2 flex-1"
-          value={imageUrl}
-          onChange={(e) => setImageUrl(e.target.value)}
-        />
-        <input
-          type="text"
-          placeholder="Alt text"
-          className="border p-2 flex-1"
-          value={altText}
-          onChange={(e) => setAltText(e.target.value)}
+          className="border px-3 py-2"
+          value={newProduct.image}
+          onChange={(e) => setNewProduct({ ...newProduct, image: e.target.value })}
         />
         <button
-          onClick={addBanner}
-          className="bg-blue-500 text-white px-4 py-2 rounded"
+          className="bg-green-500 text-white px-4 py-2"
+          onClick={addProduct}
         >
-          Add
+          Add Product
         </button>
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        {banners.map((banner) => (
-          <div key={banner.id} className="relative border rounded overflow-hidden">
-            <img src={banner.imageUrl} alt={banner.altText} className="w-full h-28 object-cover" />
-            <button
-              onClick={() => deleteBanner(banner.id)}
-              className="absolute top-1 right-1 bg-red-500 text-white px-2 py-1 text-sm rounded"
-            >
-              Delete
-            </button>
+      <div className="mt-6 grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3">
+        {products.map((product) => (
+          <div key={product.id} className="border p-4 rounded">
+            <img src={product.image} alt="" className="h-32 object-cover w-full mb-2" />
+            <h3 className="font-bold">{product.name}</h3>
+            <p>₹{product.price}</p>
+            <p>Status: {product.inStock ? "In Stock ✅" : "Out of Stock ❌"}</p>
+            <div className="flex gap-2 mt-2">
+              <button
+                className="bg-yellow-500 px-3 py-1 text-white"
+                onClick={() => toggleStock(product.id, product.inStock)}
+              >
+                Toggle Stock
+              </button>
+              <button
+                className="bg-red-500 px-3 py-1 text-white"
+                onClick={() => deleteProduct(product.id)}
+              >
+                Delete
+              </button>
+            </div>
           </div>
         ))}
       </div>
@@ -81,4 +110,4 @@ const Banners = () => {
   );
 };
 
-export default Banners;
+export default Products;
