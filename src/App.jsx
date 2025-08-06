@@ -8,7 +8,7 @@ import Navbar from "./components/Navbar";
 import Topbar from "./components/Topbar";
 import useIsMobile from "./hooks/useIsMobile";
 import OffersAdmin from "./components/OffersAdmin";
-import BannersAdmin from "./components/Banners";
+import Banners from "./components/Banners";
 import CategoriesAdmin from "./components/CategoriesAdmin";
 
 function App() {
