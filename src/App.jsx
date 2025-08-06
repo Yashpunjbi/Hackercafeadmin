@@ -8,7 +8,7 @@ import Navbar from "./components/Navbar";
 import Topbar from "./components/Topbar";
 import useIsMobile from "./hooks/useIsMobile";
 import OffersAdmin from "./components/OffersAdmin";
-import BannersAdmin from "./components/BannersAdmin";
+import BannersAdmin from "./components/Banners";
 import CategoriesAdmin from "./components/CategoriesAdmin";
 
 function App() {
@@ -64,10 +64,10 @@ function App() {
           />
 
           <Route
-            path="/bannersadmin"
+            path="/banners"
             element={
               <PrivateRoute>
-                <BannersAdmin />
+                <Banners />
               </PrivateRoute>
             }
           />
