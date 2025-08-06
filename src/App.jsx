@@ -9,7 +9,7 @@ import Topbar from "./components/Topbar";
 import useIsMobile from "./hooks/useIsMobile";
 import OffersAdmin from "./components/OffersAdmin";
 import Banners from "./components/Banners";
-import CategoriesAdmin from "./components/CategoriesAdmin";
+import Categories from "./components/Categories";
 
 function App() {
   const { user } = useAuth();
@@ -73,10 +73,10 @@ function App() {
           />
 
           <Route
-            path="/categoriesadmin"
+            path="/categories"
             element={
               <PrivateRoute>
-                <CategoriesAdmin />
+                <Categories />
               </PrivateRoute>
             }
           />
