@@ -15,6 +15,7 @@ const Products = () => {
     name: "",
     price: "",
     image: "",
+    category: "",
     inStock: true,
   });
 
@@ -25,11 +26,25 @@ const Products = () => {
   };
 
   const addProduct = async () => {
+    if (!newProduct.name || !newProduct.price || !newProduct.image || !newProduct.category) {
+      alert("Please fill all fields.");
+      return;
+    }
+
     await addDoc(collection(db, "products"), {
       ...newProduct,
       price: Number(newProduct.price),
+      category: newProduct.category.toLowerCase(), // lowercase for route match
     });
-    setNewProduct({ name: "", price: "", image: "", inStock: true });
+
+    setNewProduct({
+      name: "",
+      price: "",
+      image: "",
+      category: "",
+      inStock: true,
+    });
+
     fetchProducts();
   };
 
@@ -56,23 +71,30 @@ const Products = () => {
         <input
           type="text"
           placeholder="Name"
-          className="border px-3 py-2"
+          className="border px-3 py-2 w-full"
           value={newProduct.name}
           onChange={(e) => setNewProduct({ ...newProduct, name: e.target.value })}
         />
         <input
           type="number"
           placeholder="Price"
-          className="border px-3 py-2"
+          className="border px-3 py-2 w-full"
           value={newProduct.price}
           onChange={(e) => setNewProduct({ ...newProduct, price: e.target.value })}
         />
         <input
           type="text"
           placeholder="Image URL"
-          className="border px-3 py-2"
+          className="border px-3 py-2 w-full"
           value={newProduct.image}
           onChange={(e) => setNewProduct({ ...newProduct, image: e.target.value })}
+        />
+        <input
+          type="text"
+          placeholder="Category (e.g. pizza, sandwich)"
+          className="border px-3 py-2 w-full"
+          value={newProduct.category}
+          onChange={(e) => setNewProduct({ ...newProduct, category: e.target.value })}
         />
         <button
           className="bg-green-500 text-white px-4 py-2"
@@ -88,6 +110,7 @@ const Products = () => {
             <img src={product.image} alt="" className="h-32 object-cover w-full mb-2" />
             <h3 className="font-bold">{product.name}</h3>
             <p>₹{product.price}</p>
+            <p>Category: {product.category}</p>
             <p>Status: {product.inStock ? "In Stock ✅" : "Out of Stock ❌"}</p>
             <div className="flex gap-2 mt-2">
               <button
