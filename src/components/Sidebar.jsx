@@ -1,51 +1,24 @@
-import React, { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
-import { Menu, X } from "lucide-react";
+import React from 'react';
+import { Link } from 'react-router-dom';
 
-const Sidebar = () => {
-  const [open, setOpen] = useState(false);
-  const location = useLocation();
-
-  const getActiveClass = (path) =>
-    location.pathname === path ? "text-yellow-400 font-bold" : "text-white";
-
-  const links = [
-    { to: "/", label: "Dashboard" },
-    { to: "/orders", label: "Orders" },
-    { to: "/products", label: "Products" },
-    { to: "/offersadmin", label: "Offers" },
-    { to: "/banners", label: "Banners" },
-    { to: "/categories", label: "Categories" },
-    { to: "/promo-codes", label: "Promo Codes" },
-  ];
-
+const Sidebar = ({ isOpen, toggleSidebar }) => {
   return (
-    <>
-      <div className="fixed top-0 left-0 right-0 bg-gray-900 text-white flex justify-between items-center px-4 py-3 z-50 shadow-md md:hidden">
-        <h1 className="text-lg font-bold">Admin Panel</h1>
-        <button onClick={() => setOpen(!open)}>
-          {open ? <X size={24} /> : <Menu size={24} />}
-        </button>
-      </div>
-
-      {/* Sidebar Drawer */}
-      {open && (
-        <div className="fixed top-12 left-0 w-3/4 h-full bg-gray-800 text-white p-4 z-40 shadow-lg">
-          <nav className="flex flex-col space-y-4">
-            {links.map((link) => (
-              <Link
-                key={link.to}
-                to={link.to}
-                onClick={() => setOpen(false)}
-                className={`${getActiveClass(link.to)} hover:text-yellow-400`}
-              >
-                {link.label}
-              </Link>
-            ))}
-          </nav>
-        </div>
-      )}
-    </>
+    <div
+      className={`fixed top-0 left-0 h-full w-64 bg-black text-white p-5 z-50 transition-transform transform ${
+        isOpen ? 'translate-x-0' : '-translate-x-full'
+      } md:translate-x-0 md:static md:block`}
+    >
+      <h2 className="text-2xl font-bold mb-5">Hacker Cafe</h2>
+      <nav className="flex flex-col gap-4">
+        <Link to="/" onClick={toggleSidebar}>Dashboard</Link>
+        <Link to="/orders" onClick={toggleSidebar}>Orders</Link>
+        <Link to="/products" onClick={toggleSidebar}>Products</Link>
+        <Link to="/offers" onClick={toggleSidebar}>Offers</Link>
+        <Link to="/banners" onClick={toggleSidebar}>Banners</Link>
+        <Link to="/categories" onClick={toggleSidebar}>Categories</Link>
+        <Link to="/promocodes" onClick={toggleSidebar}>Promo Codes</Link>
+      </nav>
+    </div>
   );
 };
 
