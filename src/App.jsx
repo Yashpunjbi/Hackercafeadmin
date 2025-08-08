@@ -5,7 +5,6 @@ import Orders from "./components/Orders";
 import Products from "./components/Products";
 import Login from "./components/Login";
 import Navbar from "./components/Navbar";
-import Topbar from "./components/Topbar";
 import Sidebar from "./components/Sidebar";
 import useIsMobile from "./hooks/useIsMobile";
 import OffersAdmin from "./components/OffersAdmin";
@@ -23,8 +22,7 @@ function App() {
 
   return (
     <BrowserRouter>
-      {user && (isMobile ? <Sidebar /> : <Topbar />)}
-
+      {user && <Sidebar />}
       <div className="flex flex-col p-4">
         <Routes>
           <Route path="/login" element={<Login />} />
