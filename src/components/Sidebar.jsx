@@ -1,10 +1,10 @@
 import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Menu } from "lucide-react"; // For mobile toggle icon
+import { Menu } from "lucide-react";
 
 const Sidebar = () => {
   const location = useLocation();
-  const [open, setOpen] = useState(false); // for mobile menu toggle
+  const [open, setOpen] = useState(false);
 
   const getActiveClass = (path) =>
     location.pathname === path
