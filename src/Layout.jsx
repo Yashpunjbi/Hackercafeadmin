@@ -1,66 +1,26 @@
-import React, { useState } from 'react';
-import { Link, Outlet, useLocation } from 'react-router-dom';
-import { Menu, X } from 'lucide-react';
+// src/Layout.jsx
+import React, { useState } from "react";
+import Sidebar from "./components/Sidebar";
+import Navbar from "./components/Navbar";
 
-const menuItems = [
-  { name: 'Dashboard', path: '/' },
-  { name: 'Orders', path: '/orders' },
-  { name: 'Products', path: '/products' },
-  { name: 'Offers', path: '/offersadmin' },
-  { name: 'Banners', path: '/banners' },
-  { name: 'Categories', path: '/categories' },
-  { name: 'Promo Codes', path: '/promocodes' },
-];
-
-export default function Layout() {
+const Layout = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const location = useLocation();
 
   return (
-    <div className="flex min-h-screen bg-gray-50">
+    <div className="flex h-screen bg-gray-100">
       {/* Sidebar */}
-      <div
-        className={`bg-black text-white w-64 p-4 space-y-4 fixed md:relative z-50 transform ${
-          sidebarOpen ? 'translate-x-0' : '-translate-x-full'
-        } transition-transform duration-200 ease-in-out md:translate-x-0`}
-      >
-        <div className="flex justify-between items-center md:hidden">
-          <h2 className="text-xl font-bold">Admin Panel</h2>
-          <button onClick={() => setSidebarOpen(false)} className="text-white">
-            <X />
-          </button>
-        </div>
-        <nav className="space-y-2 mt-4">
-          {menuItems.map((item) => (
-            <Link
-              key={item.name}
-              to={item.path}
-              className={`block px-4 py-2 rounded hover:bg-white hover:text-black ${
-                location.pathname === item.path ? 'bg-white text-black font-semibold' : ''
-              }`}
-              onClick={() => setSidebarOpen(false)}
-            >
-              {item.name}
-            </Link>
-          ))}
-        </nav>
-      </div>
+      <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
-      {/* Content Area */}
-      <div className="flex-1 flex flex-col">
-        {/* Topbar */}
-        <div className="bg-white shadow p-4 flex items-center justify-between md:justify-end">
-          <button onClick={() => setSidebarOpen(true)} className="md:hidden">
-            <Menu />
-          </button>
-          <h1 className="text-lg font-bold hidden md:block">Hacker Cafe Admin</h1>
-        </div>
+      {/* Main content */}
+      <div className="flex flex-col flex-1 overflow-hidden">
+        {/* Top Navbar */}
+        <Navbar onToggleSidebar={() => setSidebarOpen(!sidebarOpen)} />
 
         {/* Page Content */}
-        <main className="p-4">
-          <Outlet />
-        </main>
+        <main className="flex-1 overflow-y-auto p-4">{children}</main>
       </div>
     </div>
   );
-}
+};
+
+export default Layout;
