@@ -1,102 +1,36 @@
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { useAuth } from "./context/AuthContext";
+import React from "react";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import Navbar from "./components/Navbar";
+import Sidebar from "./components/Sidebar";
+
 import Dashboard from "./components/Dashboard";
 import Orders from "./components/Orders";
 import Products from "./components/Products";
-import Login from "./components/Login";
-import Sidebar from "./components/Sidebar";
-import useIsMobile from "./hooks/useIsMobile";
-import OffersAdmin from "./components/OffersAdmin";
+import Offers from "./components/Offers";
 import Banners from "./components/Banners";
 import Categories from "./components/Categories";
-import PromoCodeManager from './components/PromoCodeManager';
+import PromoCodes from "./components/PromoCodes";
 
 function App() {
-  const { user } = useAuth();
-  const isMobile = useIsMobile();
-
-  const PrivateRoute = ({ children }) => {
-    return user ? children : <Navigate to="/login" />;
-  };
-
   return (
-    <BrowserRouter>
-      {user ? (
-        <div className="flex min-h-screen">
-          {/* Sidebar - visible only on desktop */}
-          {!isMobile && <Sidebar />}
+    <Router>
+      <div>
+        <Navbar />
+        <Sidebar />
 
-          {/* Main content */}
-          <div className="flex-1 p-4">
-            <Routes>
-              <Route path="/login" element={<Login />} />
-              <Route
-                path="/"
-                element={
-                  <PrivateRoute>
-                    <Dashboard />
-                  </PrivateRoute>
-                }
-              />
-              <Route
-                path="/orders"
-                element={
-                  <PrivateRoute>
-                    <Orders />
-                  </PrivateRoute>
-                }
-              />
-              <Route
-                path="/products"
-                element={
-                  <PrivateRoute>
-                    <Products />
-                  </PrivateRoute>
-                }
-              />
-              <Route
-                path="/offersadmin"
-                element={
-                  <PrivateRoute>
-                    <OffersAdmin />
-                  </PrivateRoute>
-                }
-              />
-              <Route
-                path="/banners"
-                element={
-                  <PrivateRoute>
-                    <Banners />
-                  </PrivateRoute>
-                }
-              />
-              <Route
-                path="/categories"
-                element={
-                  <PrivateRoute>
-                    <Categories />
-                  </PrivateRoute>
-                }
-              />
-              <Route
-                path="/promo-codes"
-                element={
-                  <PrivateRoute>
-                    <PromoCodeManager />
-                  </PrivateRoute>
-                }
-              />
-            </Routes>
-          </div>
+        <div className="md:ml-64 pt-16 p-4">
+          <Routes>
+            <Route path="/" element={<Dashboard />} />
+            <Route path="/orders" element={<Orders />} />
+            <Route path="/products" element={<Products />} />
+            <Route path="/offers" element={<Offers />} />
+            <Route path="/banners" element={<Banners />} />
+            <Route path="/categories" element={<Categories />} />
+            <Route path="/promocodes" element={<PromoCodes />} />
+          </Routes>
         </div>
-      ) : (
-        // Show only login when not authenticated
-        <Routes>
-          <Route path="/login" element={<Login />} />
-          <Route path="*" element={<Navigate to="/login" />} />
-        </Routes>
-      )}
-    </BrowserRouter>
+      </div>
+    </Router>
   );
 }
 
