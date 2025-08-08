@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+seimport { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { useAuth } from "./context/AuthContext";
 import Dashboard from "./components/Dashboard";
 import Orders from "./components/Orders";
@@ -82,8 +82,14 @@ function App() {
             }
           />
 
-<Route path="/promo-codes" element={<PromoCodeManager />} />
-
+<Route
+  path="/promo-codes"
+  element={
+    <PrivateRoute>
+      <PromoCodeManager />
+    </PrivateRoute>
+  }
+/>
         </Routes>
       </div>
     </BrowserRouter>
