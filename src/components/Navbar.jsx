@@ -42,6 +42,12 @@ const Navbar = () => {
       >
         Categories
       </Link>
+      <Link
+        to="/promo-codes"
+        className={`${getActiveClass("/promo-codes")} font-semibold`}
+      >
+        Promo Codes
+      </Link>
     </nav>
   );
 };
