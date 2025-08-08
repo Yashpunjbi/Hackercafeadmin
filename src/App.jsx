@@ -22,7 +22,7 @@ function App() {
 
   return (
     <BrowserRouter>
-      {user && (isMobile ? <Navbar /> : <Topbar />)}
+      {user && (isMobile ? <Sidebar /> : <Topbar />)}
 
       <div className="flex flex-col p-4">
         <Routes>
