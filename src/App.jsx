@@ -4,7 +4,7 @@ import Layout from "./Layout";
 import Dashboard from "./components/Dashboard";
 import Orders from "./components/Orders";
 import Products from "./components/Products";
-import Offers from "./components/Offers";
+import Offers from "./components/OffersAdmin";
 import Banners from "./components/Banners";
 import Categories from "./components/Categories";
 import PromoCodes from "./components/PromoCodes";
