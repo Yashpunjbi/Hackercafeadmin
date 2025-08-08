@@ -1,53 +1,14 @@
-// src/components/Topbar.jsx
-import React from "react";
-import { Link, useLocation } from "react-router-dom";
+import React from 'react';
+import { Menu } from 'lucide-react';
 
-const Topbar = () => {
-  const location = useLocation();
-  const current = (path) =>
-    location.pathname === path ? "text-yellow-400 font-bold" : "";
-
+const Topbar = ({ toggleSidebar }) => {
   return (
-    <>
-      {/* Desktop Navbar (top) */}
-      <div className="hidden sm:flex justify-between items-center px-6 py-4 bg-gray-900 text-white">
-        <div className="text-2xl font-bold">
-          🍔 Hacker <span className="text-yellow-400">Cafe</span>
-        </div>
-        <nav className="flex gap-8">
-          <Link to="/" className={`hover:text-yellow-400 ${current("/")}`}>Dashboard</Link>
-          <Link to="/orders" className={`hover:text-yellow-400 ${current("/orders")}`}>Orders</Link>
-          <Link to="/products" className={`hover:text-yellow-400 ${current("/products")}`}>Products</Link>
-          <Link to="/banners" className={`hover:text-yellow-400 ${current("/banners")}`}>Banners</Link>
-          <Link to="/categories" className={`hover:text-yellow-400 ${current("/categories")}`}>Categories</Link>
-        </nav>
-        <div>👨‍💻 Admin</div>
-      </div>
-
-      {/* Mobile Navbar (bottom fixed) */}
-      <div className="fixed bottom-0 w-full bg-gray-900 text-white flex justify-around py-2 sm:hidden z-50 shadow-t">
-        <Link to="/" className={`flex flex-col items-center ${current("/")}`}>
-          <span>📊</span>
-          <span className="text-xs">Dashboard</span>
-        </Link>
-        <Link to="/orders" className={`flex flex-col items-center ${current("/orders")}`}>
-          <span>📦</span>
-          <span className="text-xs">Orders</span>
-        </Link>
-        <Link to="/products" className={`flex flex-col items-center ${current("/products")}`}>
-          <span>🛒</span>
-          <span className="text-xs">Products</span>
-        </Link>
-        <Link to="/banners" className={`flex flex-col items-center ${current("/banners")}`}>
-          <span>🖼️</span>
-          <span className="text-xs">Banners</span>
-        </Link>
-        <Link to="/categories" className={`flex flex-col items-center ${current("/categories")}`}>
-          <span>📂</span>
-          <span className="text-xs">Categories</span>
-        </Link>
-      </div>
-    </>
+    <div className="bg-white shadow-md p-4 flex justify-between items-center md:hidden">
+      <button onClick={toggleSidebar}>
+        <Menu className="w-6 h-6 text-black" />
+      </button>
+      <h1 className="text-xl font-semibold">Admin Panel</h1>
+    </div>
   );
 };
 
