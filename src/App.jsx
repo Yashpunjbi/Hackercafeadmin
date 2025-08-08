@@ -10,6 +10,7 @@ import useIsMobile from "./hooks/useIsMobile";
 import OffersAdmin from "./components/OffersAdmin";
 import Banners from "./components/Banners";
 import Categories from "./components/Categories";
+import PromoCodeManager from './components/PromoCodeManager';
 
 function App() {
   const { user } = useAuth();
@@ -80,6 +81,9 @@ function App() {
               </PrivateRoute>
             }
           />
+
+<Route path="/promo-codes" element={<PromoCodeManager />} />
+
         </Routes>
       </div>
     </BrowserRouter>
