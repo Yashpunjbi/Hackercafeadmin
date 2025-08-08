@@ -9,7 +9,7 @@ const menuItems = [
   { name: 'Offers', path: '/offersadmin' },
   { name: 'Banners', path: '/banners' },
   { name: 'Categories', path: '/categories' },
-  { name: 'Promo Codes', path: '/promo-codes' },
+  { name: 'PromoCodes', path: '/promocodes' },
 ];
 
 export default function Layout() {
