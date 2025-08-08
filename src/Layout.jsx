@@ -1,23 +1,29 @@
-// src/Layout.jsx
+// src/components/Layout.jsx
 import React, { useState } from "react";
-import Sidebar from "./components/Sidebar";
-import Navbar from "./components/Navbar";
+import Sidebar from "./Sidebar";
+import Navbar from "./Navbar";
+import { Outlet } from "react-router-dom";
+import useIsMobile from "../hooks/useIsMobile";
 
-const Layout = ({ children }) => {
+const Layout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const isMobile = useIsMobile();
+
+  const handleToggleSidebar = () => {
+    setSidebarOpen(!sidebarOpen);
+  };
 
   return (
-    <div className="flex h-screen bg-gray-100">
+    <div className="flex h-screen overflow-hidden">
       {/* Sidebar */}
-      <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+      <Sidebar isOpen={!isMobile || sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
       {/* Main content */}
-      <div className="flex flex-col flex-1 overflow-hidden">
-        {/* Top Navbar */}
-        <Navbar onToggleSidebar={() => setSidebarOpen(!sidebarOpen)} />
-
-        {/* Page Content */}
-        <main className="flex-1 overflow-y-auto p-4">{children}</main>
+      <div className="flex-1 flex flex-col">
+        <Navbar onToggleSidebar={handleToggleSidebar} />
+        <main className="p-4 overflow-y-auto">
+          <Outlet />
+        </main>
       </div>
     </div>
   );
