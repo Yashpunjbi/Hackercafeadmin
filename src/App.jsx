@@ -4,7 +4,6 @@ import Dashboard from "./components/Dashboard";
 import Orders from "./components/Orders";
 import Products from "./components/Products";
 import Login from "./components/Login";
-import Navbar from "./components/Navbar";
 import Sidebar from "./components/Sidebar";
 import useIsMobile from "./hooks/useIsMobile";
 import OffersAdmin from "./components/OffersAdmin";
@@ -22,75 +21,81 @@ function App() {
 
   return (
     <BrowserRouter>
-      {user && <Sidebar />}
-      <div className="flex flex-col p-4">
+      {user ? (
+        <div className="flex min-h-screen">
+          {/* Sidebar - visible only on desktop */}
+          {!isMobile && <Sidebar />}
+
+          {/* Main content */}
+          <div className="flex-1 p-4">
+            <Routes>
+              <Route path="/login" element={<Login />} />
+              <Route
+                path="/"
+                element={
+                  <PrivateRoute>
+                    <Dashboard />
+                  </PrivateRoute>
+                }
+              />
+              <Route
+                path="/orders"
+                element={
+                  <PrivateRoute>
+                    <Orders />
+                  </PrivateRoute>
+                }
+              />
+              <Route
+                path="/products"
+                element={
+                  <PrivateRoute>
+                    <Products />
+                  </PrivateRoute>
+                }
+              />
+              <Route
+                path="/offersadmin"
+                element={
+                  <PrivateRoute>
+                    <OffersAdmin />
+                  </PrivateRoute>
+                }
+              />
+              <Route
+                path="/banners"
+                element={
+                  <PrivateRoute>
+                    <Banners />
+                  </PrivateRoute>
+                }
+              />
+              <Route
+                path="/categories"
+                element={
+                  <PrivateRoute>
+                    <Categories />
+                  </PrivateRoute>
+                }
+              />
+              <Route
+                path="/promo-codes"
+                element={
+                  <PrivateRoute>
+                    <PromoCodeManager />
+                  </PrivateRoute>
+                }
+              />
+            </Routes>
+          </div>
+        </div>
+      ) : (
+        // Show only login when not authenticated
         <Routes>
           <Route path="/login" element={<Login />} />
-
-          <Route
-            path="/"
-            element={
-              <PrivateRoute>
-                <Dashboard />
-              </PrivateRoute>
-            }
-          />
-
-          <Route
-            path="/orders"
-            element={
-              <PrivateRoute>
-                <Orders />
-              </PrivateRoute>
-            }
-          />
-
-          <Route
-            path="/products"
-            element={
-              <PrivateRoute>
-                <Products />
-              </PrivateRoute>
-            }
-          />
-
-          <Route
-            path="/offersadmin"
-            element={
-              <PrivateRoute>
-                <OffersAdmin />
-              </PrivateRoute>
-            }
-          />
-
-          <Route
-            path="/banners"
-            element={
-              <PrivateRoute>
-                <Banners />
-              </PrivateRoute>
-            }
-          />
-
-          <Route
-            path="/categories"
-            element={
-              <PrivateRoute>
-                <Categories />
-              </PrivateRoute>
-            }
-          />
-
-<Route
-  path="/promo-codes"
-  element={
-    <PrivateRoute>
-      <PromoCodeManager />
-    </PrivateRoute>
-  }
-/>
+          <Route path="*" element={<Navigate to="/login" />} />
         </Routes>
-      </div>
+      )}
     </BrowserRouter>
   );
 }
