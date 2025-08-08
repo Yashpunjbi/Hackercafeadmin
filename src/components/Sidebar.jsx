@@ -1,32 +1,35 @@
+// src/components/Sidebar.jsx
 import React from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link } from "react-router-dom";
 
-const navItems = [
-  { name: "Dashboard", path: "/" },
-  { name: "Orders", path: "/orders" },
-  { name: "Products", path: "/products" },
-  { name: "Offers", path: "/offers" },
-  { name: "Banners", path: "/banners" },
-  { name: "Categories", path: "/categories" },
-  { name: "Promo Codes", path: "/promocodes" },
-];
-
-const Sidebar = () => {
-  const location = useLocation();
-
+const Sidebar = ({ isOpen, onClose }) => {
   return (
-    <div className="hidden md:flex flex-col fixed top-[56px] left-0 h-[calc(100vh-56px)] w-64 bg-white shadow-md p-4 z-30">
-      {navItems.map((item) => (
-        <Link
-          key={item.name}
-          to={item.path}
-          className={`mb-2 px-4 py-2 rounded hover:bg-yellow-100 ${
-            location.pathname === item.path ? "bg-yellow-200 font-semibold" : ""
-          }`}
+    <div
+      className={`fixed z-40 inset-y-0 left-0 w-64 transform bg-white border-r transition-transform duration-300 ease-in-out
+        ${isOpen ? "translate-x-0" : "-translate-x-full"} 
+        md:translate-x-0 md:static md:inset-0`}
+    >
+      {/* Close button for mobile */}
+      <div className="md:hidden flex justify-end p-2">
+        <button
+          className="text-gray-600 hover:text-black"
+          onClick={onClose}
         >
-          {item.name}
-        </Link>
-      ))}
+          ✕
+        </button>
+      </div>
+
+      <div className="p-4">
+        <h2 className="text-2xl font-bold mb-6">Admin Panel</h2>
+        <nav className="flex flex-col gap-4">
+          <Link to="/dashboard">Dashboard</Link>
+          <Link to="/orders">Orders</Link>
+          <Link to="/products">Products</Link>
+          <Link to="/promocodes">Promo Codes</Link>
+          <Link to="/banners">Banners</Link>
+          <Link to="/categories">Categories</Link>
+        </nav>
+      </div>
     </div>
   );
 };
