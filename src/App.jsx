@@ -10,7 +10,7 @@ import Offers from "./components/Offers";
 import Banners from "./components/Banners";
 import Categories from "./components/Categories";
 import PromoCodes from "./components/PromoCodes";
-
+import Layout from './Layout';
 function App() {
   return (
     <Router>
@@ -27,6 +27,7 @@ function App() {
             <Route path="/banners" element={<Banners />} />
             <Route path="/categories" element={<Categories />} />
             <Route path="/promocodes" element={<PromoCodes />} />
+<Route path="/" element={<Layout />}>
           </Routes>
         </div>
       </div>
