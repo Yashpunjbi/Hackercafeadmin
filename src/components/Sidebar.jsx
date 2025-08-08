@@ -1,24 +1,57 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState } from "react";
+import { Link, useLocation } from "react-router-dom";
+import { Menu } from "lucide-react"; // For mobile toggle icon
 
-const Sidebar = ({ isOpen, toggleSidebar }) => {
+const Sidebar = () => {
+  const location = useLocation();
+  const [open, setOpen] = useState(false); // for mobile menu toggle
+
+  const getActiveClass = (path) =>
+    location.pathname === path
+      ? "bg-yellow-400 text-black font-semibold"
+      : "text-white hover:bg-gray-800";
+
   return (
-    <div
-      className={`fixed top-0 left-0 h-full w-64 bg-black text-white p-5 z-50 transition-transform transform ${
-        isOpen ? 'translate-x-0' : '-translate-x-full'
-      } md:translate-x-0 md:static md:block`}
-    >
-      <h2 className="text-2xl font-bold mb-5">Hacker Cafe</h2>
-      <nav className="flex flex-col gap-4">
-        <Link to="/" onClick={toggleSidebar}>Dashboard</Link>
-        <Link to="/orders" onClick={toggleSidebar}>Orders</Link>
-        <Link to="/products" onClick={toggleSidebar}>Products</Link>
-        <Link to="/offers" onClick={toggleSidebar}>Offers</Link>
-        <Link to="/banners" onClick={toggleSidebar}>Banners</Link>
-        <Link to="/categories" onClick={toggleSidebar}>Categories</Link>
-        <Link to="/promocodes" onClick={toggleSidebar}>Promo Codes</Link>
-      </nav>
-    </div>
+    <>
+      {/* Mobile Top Navbar */}
+      <div className="md:hidden flex justify-between items-center bg-gray-900 text-white p-4 fixed top-0 left-0 right-0 z-50">
+        <h1 className="text-lg font-bold">Admin Panel</h1>
+        <button onClick={() => setOpen(!open)}>
+          <Menu />
+        </button>
+      </div>
+
+      {/* Sidebar */}
+      <div
+        className={`${
+          open ? "block" : "hidden"
+        } md:block fixed top-0 left-0 h-screen w-64 bg-gray-900 text-white z-40 pt-20 md:pt-6 transition-all`}
+      >
+        <nav className="flex flex-col gap-2 px-4 py-2">
+          <Link to="/" className={`p-2 rounded ${getActiveClass("/")}`}>
+            Dashboard
+          </Link>
+          <Link to="/orders" className={`p-2 rounded ${getActiveClass("/orders")}`}>
+            Orders
+          </Link>
+          <Link to="/products" className={`p-2 rounded ${getActiveClass("/products")}`}>
+            Products
+          </Link>
+          <Link to="/offersadmin" className={`p-2 rounded ${getActiveClass("/offersadmin")}`}>
+            Offers
+          </Link>
+          <Link to="/banners" className={`p-2 rounded ${getActiveClass("/banners")}`}>
+            Banners
+          </Link>
+          <Link to="/categories" className={`p-2 rounded ${getActiveClass("/categories")}`}>
+            Categories
+          </Link>
+          <Link to="/promo-codes" className={`p-2 rounded ${getActiveClass("/promo-codes")}`}>
+            Promo Codes
+          </Link>
+        </nav>
+      </div>
+    </>
   );
 };
 
