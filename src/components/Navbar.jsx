@@ -1,19 +1,24 @@
+// src/components/Navbar.jsx
 import React from "react";
-import { LogOut } from "lucide-react";
 
-const Navbar = () => {
-  const handleLogout = () => {
-    // Add Firebase logout logic here
-    console.log("Logging out...");
-  };
-
+const Navbar = ({ onToggleSidebar }) => {
   return (
-    <div className="w-full bg-black text-white flex justify-between items-center px-6 py-3 shadow-md fixed top-0 left-0 z-40">
-      <h1 className="text-xl font-bold">Hacker Cafe Admin</h1>
-      <button onClick={handleLogout} className="flex items-center gap-2 text-sm hover:text-yellow-400">
-        <LogOut size={18} /> Logout
+    <header className="bg-white border-b p-4 flex items-center justify-between shadow-sm">
+      {/* Mobile toggle button */}
+      <button
+        className="md:hidden text-xl"
+        onClick={onToggleSidebar}
+      >
+        ☰
       </button>
-    </div>
+
+      <h1 className="text-xl font-bold">Hacker Cafe Admin</h1>
+
+      {/* Right-side content (if any) */}
+      <div>
+        {/* Add user profile, logout, etc. */}
+      </div>
+    </header>
   );
 };
 
