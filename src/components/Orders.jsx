@@ -3,6 +3,14 @@ import React, { useEffect, useState } from "react";
 import { db } from "../firebase";
 import { collection, onSnapshot, updateDoc, doc } from "firebase/firestore";
 
+const statusColors = {
+  placed: "bg-gray-200 text-gray-800",
+  preparing: "bg-yellow-100 text-yellow-800",
+  out_for_delivery: "bg-blue-100 text-blue-800",
+  delivered: "bg-green-100 text-green-800",
+  cancelled: "bg-red-100 text-red-800",
+};
+
 const Orders = () => {
   const [orders, setOrders] = useState([]);
 
@@ -33,44 +41,74 @@ const Orders = () => {
 
   return (
     <div className="p-6">
-      <h2 className="text-2xl font-bold mb-4">🧾 Orders</h2>
+      <h2 className="text-3xl font-bold mb-6 text-gray-800 dark:text-white">
+        🧾 Orders Management
+      </h2>
 
       {orders.length === 0 ? (
-        <p className="text-gray-500">No orders yet.</p>
+        <div className="text-center py-10 text-gray-500">
+          No orders found.
+        </div>
       ) : (
-        <div className="overflow-x-auto">
-          <table className="min-w-full table-auto bg-white rounded-md shadow-md">
-            <thead className="bg-gray-100 text-gray-700 text-left">
+        <div className="overflow-x-auto bg-white dark:bg-gray-900 rounded-2xl shadow-lg">
+          <table className="min-w-full text-sm">
+            <thead className="bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300">
               <tr>
-                <th className="py-2 px-4">Customer</th>
-                <th className="py-2 px-4">Phone</th>
-                <th className="py-2 px-4">Address</th>
-                <th className="py-2 px-4">Items</th>
-                <th className="py-2 px-4">Status</th>
+                <th className="py-3 px-4 text-left">Customer</th>
+                <th className="py-3 px-4 text-left">Phone</th>
+                <th className="py-3 px-4 text-left">Address</th>
+                <th className="py-3 px-4 text-left">Items</th>
+                <th className="py-3 px-4 text-left">Status</th>
               </tr>
             </thead>
+
             <tbody>
               {orders.map((order) => (
-                <tr key={order.id} className="border-t hover:bg-gray-50">
-                  <td className="py-2 px-4">{order.name || "N/A"}</td>
-                  <td className="py-2 px-4">{order.phone}</td>
-                  <td className="py-2 px-4">{order.address}</td>
-                  <td className="py-2 px-4 whitespace-pre-wrap text-sm">
-                    {order.items?.map((item, i) => (
-                      <div key={i}>
-                        🍽 {item.name} × {item.quantity}
-                      </div>
-                    ))}
+                <tr
+                  key={order.id}
+                  className="border-t hover:bg-gray-50 dark:hover:bg-gray-800 transition"
+                >
+                  {/* Customer */}
+                  <td className="py-3 px-4 font-medium">
+                    {order.name || "N/A"}
                   </td>
-                  <td className="py-2 px-4 font-semibold capitalize">
+
+                  {/* Phone */}
+                  <td className="py-3 px-4">{order.phone}</td>
+
+                  {/* Address */}
+                  <td className="py-3 px-4 max-w-xs text-gray-600 dark:text-gray-300">
+                    {order.address}
+                  </td>
+
+                  {/* Items */}
+                  <td className="py-3 px-4">
+                    <div className="space-y-1">
+                      {order.items?.map((item, i) => (
+                        <div
+                          key={i}
+                          className="bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded-md"
+                        >
+                          🍽 {item.name} × {item.quantity}
+                        </div>
+                      ))}
+                    </div>
+                  </td>
+
+                  {/* Status */}
+                  <td className="py-3 px-4">
                     <select
                       value={order.status || "placed"}
-                      onChange={(e) => handleStatusUpdate(order.id, e.target.value)}
-                      className="border px-2 py-1 rounded bg-white"
+                      onChange={(e) =>
+                        handleStatusUpdate(order.id, e.target.value)
+                      }
+                      className={`px-3 py-1 rounded-lg font-semibold border focus:outline-none ${
+                        statusColors[order.status || "placed"]
+                      }`}
                     >
                       {statusOptions.map((status) => (
                         <option key={status} value={status}>
-                          {status.replace(/_/g, " ")}
+                          {status.replace(/_/g, " ").toUpperCase()}
                         </option>
                       ))}
                     </select>
