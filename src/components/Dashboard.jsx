@@ -1,12 +1,6 @@
 // src/components/Dashboard.jsx
 import React from "react";
-import {
-  ShoppingCart,
-  Clock,
-  DollarSign,
-  Users,
-  TrendingUp,
-} from "lucide-react";
+import { ShoppingCart, Clock, DollarSign, Users, TrendingUp } from "lucide-react";
 
 const stats = [
   {
@@ -44,11 +38,13 @@ const stats = [
 const Dashboard = () => {
   return (
     <div className="p-6 text-gray-800 dark:text-white">
+      {/* Header */}
       <h1 className="text-3xl font-bold mb-2">Welcome, Admin 👋</h1>
       <p className="text-lg opacity-80 mb-6">
         This is your dashboard. Use the sidebar to navigate and manage orders.
       </p>
 
+      {/* Stats Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {stats.map((stat) => (
           <div
