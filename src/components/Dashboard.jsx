@@ -1,60 +1,67 @@
 // src/components/Dashboard.jsx
 import React from "react";
-import { ShoppingCart, Clock, DollarSign } from "lucide-react";
+import {
+  ShoppingCart,
+  Clock,
+  DollarSign,
+  Users,
+  TrendingUp,
+} from "lucide-react";
+
+const stats = [
+  {
+    title: "Today's Orders",
+    value: 12,
+    icon: <ShoppingCart size={24} className="text-white" />,
+    color: "bg-gradient-to-r from-red-500 to-pink-500",
+  },
+  {
+    title: "Pending Orders",
+    value: 5,
+    icon: <Clock size={24} className="text-white" />,
+    color: "bg-gradient-to-r from-yellow-400 to-orange-500",
+  },
+  {
+    title: "Total Sales",
+    value: "₹1,250",
+    icon: <DollarSign size={24} className="text-white" />,
+    color: "bg-gradient-to-r from-green-400 to-teal-500",
+  },
+  {
+    title: "Total Customers",
+    value: 78,
+    icon: <Users size={24} className="text-white" />,
+    color: "bg-gradient-to-r from-blue-400 to-indigo-500",
+  },
+  {
+    title: "Revenue Today",
+    value: "₹3,400",
+    icon: <TrendingUp size={24} className="text-white" />,
+    color: "bg-gradient-to-r from-purple-500 to-pink-500",
+  },
+];
 
 const Dashboard = () => {
-  // Dummy data (Firebase se connect karne ke liye aap baad me replace karenge)
-  const stats = [
-    {
-      title: "Today's Orders",
-      value: 12,
-      icon: <ShoppingCart className="w-8 h-8 text-white" />,
-      bg: "bg-gradient-to-r from-pink-500 to-orange-400",
-    },
-    {
-      title: "Pending Orders",
-      value: 5,
-      icon: <Clock className="w-8 h-8 text-white" />,
-      bg: "bg-gradient-to-r from-blue-500 to-indigo-500",
-    },
-    {
-      title: "Total Sales",
-      value: "₹1,250",
-      icon: <DollarSign className="w-8 h-8 text-white" />,
-      bg: "bg-gradient-to-r from-green-400 to-teal-500",
-    },
-  ];
-
   return (
     <div className="p-6 text-gray-800 dark:text-white">
       <h1 className="text-3xl font-bold mb-2">Welcome, Admin 👋</h1>
-      <p className="text-lg text-gray-600 dark:text-gray-300">
-        Here's a quick overview of your kitchen today.
+      <p className="text-lg opacity-80 mb-6">
+        This is your dashboard. Use the sidebar to navigate and manage orders.
       </p>
 
-      <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {stats.map((stat, index) => (
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        {stats.map((stat) => (
           <div
-            key={index}
-            className={`flex items-center p-6 rounded-xl shadow-lg transform transition-transform duration-300 hover:scale-105 ${stat.bg}`}
+            key={stat.title}
+            className={`flex items-center justify-between p-5 rounded-xl shadow-lg transform transition duration-300 hover:scale-105 hover:shadow-2xl ${stat.color}`}
           >
-            <div className="p-4 bg-white/20 rounded-full mr-4 flex items-center justify-center">
-              {stat.icon}
+            <div className="flex flex-col">
+              <h3 className="text-white text-lg font-medium">{stat.title}</h3>
+              <p className="text-2xl font-bold mt-1 text-white">{stat.value}</p>
             </div>
-            <div>
-              <h2 className="text-lg font-semibold text-white">{stat.title}</h2>
-              <p className="text-2xl font-bold text-white mt-1">{stat.value}</p>
-            </div>
+            <div className="p-3 bg-white/20 rounded-full">{stat.icon}</div>
           </div>
         ))}
-      </div>
-
-      {/* Extra section for future charts or stats */}
-      <div className="mt-8 bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg">
-        <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-white">Quick Insights</h2>
-        <p className="text-gray-600 dark:text-gray-300">
-          You can add charts, graphs, or recent order summaries here to make your dashboard more interactive.
-        </p>
       </div>
     </div>
   );
