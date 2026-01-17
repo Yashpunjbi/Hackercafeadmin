@@ -137,13 +137,12 @@ const Orders = ({ onlyToday = false }) => {
                       }
                       className="border rounded-lg px-2 py-1 text-xs bg-white focus:outline-none"
                     >
-                      <option value="placed">Placed</option>
-                      <option value="preparing">Preparing</option>
-                      <option value="out_for_delivery">
-                        Out for Delivery
-                      </option>
-                      <option value="delivered">Delivered</option>
-                      <option value="cancelled">Cancelled</option>
+                      <option value="Placed">Placed</option>
+<option value="Preparing">Preparing</option>
+<option value="Ready">Ready</option>
+<option value="OutForDelivery">Out for Delivery</option>
+<option value="Delivered">Delivered</option>
+<option value="Cancelled">Cancelled</option>
                     </select>
                   </td>
                 </tr>
