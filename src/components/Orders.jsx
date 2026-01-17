@@ -1,116 +1,109 @@
-// src/components/Orders.jsx
 import React, { useEffect, useState } from "react";
 import { db } from "../firebase";
-import { collection, onSnapshot, updateDoc, doc } from "firebase/firestore";
+import {
+  collection,
+  onSnapshot,
+  updateDoc,
+  doc,
+  query,
+  where,
+} from "firebase/firestore";
+import { Search } from "lucide-react";
 
-const statusColors = {
-  placed: "bg-gray-200 text-gray-800",
-  preparing: "bg-yellow-100 text-yellow-800",
-  out_for_delivery: "bg-blue-100 text-blue-800",
-  delivered: "bg-green-100 text-green-800",
-  cancelled: "bg-red-100 text-red-800",
-};
-
-const Orders = () => {
+const Orders = ({ onlyToday = false }) => {
   const [orders, setOrders] = useState([]);
+  const [search, setSearch] = useState("");
 
   useEffect(() => {
-    const unsubscribe = onSnapshot(collection(db, "orders"), (snapshot) => {
-      const ordersData = snapshot.docs.map((doc) => ({
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const q = onlyToday
+      ? query(collection(db, "orders"), where("createdAt", ">=", today))
+      : collection(db, "orders");
+
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const data = snapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
       }));
-      setOrders(ordersData);
+      setOrders(data);
     });
 
     return () => unsubscribe();
-  }, []);
+  }, [onlyToday]);
 
-  const handleStatusUpdate = async (id, newStatus) => {
-    const orderRef = doc(db, "orders", id);
-    await updateDoc(orderRef, { status: newStatus });
+  const handleStatusUpdate = async (id, status) => {
+    await updateDoc(doc(db, "orders", id), { status });
   };
 
-  const statusOptions = [
-    "placed",
-    "preparing",
-    "out_for_delivery",
-    "delivered",
-    "cancelled",
-  ];
+  const filteredOrders = orders.filter((order) =>
+    `${order.name} ${order.phone} ${order.id}`
+      .toLowerCase()
+      .includes(search.toLowerCase())
+  );
 
   return (
     <div className="p-6">
-      <h2 className="text-3xl font-bold mb-6 text-gray-800 dark:text-white">
-        🧾 Orders Management
-      </h2>
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-5 gap-3">
+        <h2 className="text-3xl font-bold">🧾 Orders</h2>
 
-      {orders.length === 0 ? (
-        <div className="text-center py-10 text-gray-500">
-          No orders found.
+        {/* 🔍 Search */}
+        <div className="flex items-center bg-white rounded-xl shadow px-3">
+          <Search size={18} className="text-gray-400" />
+          <input
+            type="text"
+            placeholder="Search name / phone / order id"
+            className="px-2 py-2 outline-none"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
         </div>
+      </div>
+
+      {filteredOrders.length === 0 ? (
+        <p className="text-gray-500">No orders found.</p>
       ) : (
-        <div className="overflow-x-auto bg-white dark:bg-gray-900 rounded-2xl shadow-lg">
+        <div className="overflow-x-auto bg-white rounded-2xl shadow">
           <table className="min-w-full text-sm">
-            <thead className="bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300">
+            <thead className="bg-gray-100">
               <tr>
-                <th className="py-3 px-4 text-left">Customer</th>
-                <th className="py-3 px-4 text-left">Phone</th>
-                <th className="py-3 px-4 text-left">Address</th>
-                <th className="py-3 px-4 text-left">Items</th>
-                <th className="py-3 px-4 text-left">Status</th>
+                <th className="p-3 text-left">Customer</th>
+                <th className="p-3 text-left">Phone</th>
+                <th className="p-3 text-left">Items</th>
+                <th className="p-3 text-left">Status</th>
               </tr>
             </thead>
 
             <tbody>
-              {orders.map((order) => (
-                <tr
-                  key={order.id}
-                  className="border-t hover:bg-gray-50 dark:hover:bg-gray-800 transition"
-                >
-                  {/* Customer */}
-                  <td className="py-3 px-4 font-medium">
-                    {order.name || "N/A"}
+              {filteredOrders.map((order) => (
+                <tr key={order.id} className="border-t hover:bg-gray-50">
+                  <td className="p-3 font-medium">{order.name}</td>
+                  <td className="p-3">{order.phone}</td>
+
+                  <td className="p-3">
+                    {order.items?.map((i, idx) => (
+                      <div key={idx}>
+                        🍽 {i.name} × {i.quantity}
+                      </div>
+                    ))}
                   </td>
 
-                  {/* Phone */}
-                  <td className="py-3 px-4">{order.phone}</td>
-
-                  {/* Address */}
-                  <td className="py-3 px-4 max-w-xs text-gray-600 dark:text-gray-300">
-                    {order.address}
-                  </td>
-
-                  {/* Items */}
-                  <td className="py-3 px-4">
-                    <div className="space-y-1">
-                      {order.items?.map((item, i) => (
-                        <div
-                          key={i}
-                          className="bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded-md"
-                        >
-                          🍽 {item.name} × {item.quantity}
-                        </div>
-                      ))}
-                    </div>
-                  </td>
-
-                  {/* Status */}
-                  <td className="py-3 px-4">
+                  <td className="p-3">
                     <select
-                      value={order.status || "placed"}
+                      value={order.status}
                       onChange={(e) =>
                         handleStatusUpdate(order.id, e.target.value)
                       }
-                      className={`px-3 py-1 rounded-lg font-semibold border focus:outline-none ${
-                        statusColors[order.status || "placed"]
-                      }`}
+                      className="border rounded px-2 py-1"
                     >
-                      {statusOptions.map((status) => (
-                        <option key={status} value={status}>
-                          {status.replace(/_/g, " ").toUpperCase()}
-                        </option>
-                      ))}
+                      <option value="placed">Placed</option>
+                      <option value="preparing">Preparing</option>
+                      <option value="out_for_delivery">
+                        Out for delivery
+                      </option>
+                      <option value="delivered">Delivered</option>
+                      <option value="cancelled">Cancelled</option>
                     </select>
                   </td>
                 </tr>
