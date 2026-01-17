@@ -1,18 +1,23 @@
 import React, { useEffect, useState } from "react";
-import { db } from "../firebase";
+import { db, storage } from "../firebase";
 import {
   collection,
   addDoc,
-  getDocs,
   deleteDoc,
   doc,
   onSnapshot,
 } from "firebase/firestore";
+import {
+  ref,
+  uploadBytes,
+  getDownloadURL,
+} from "firebase/storage";
 
 const Banners = () => {
   const [banners, setBanners] = useState([]);
   const [title, setTitle] = useState("");
-  const [image, setImage] = useState("");
+  const [image, setImage] = useState(""); // image URL
+  const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
     const unsub = onSnapshot(collection(db, "banners"), (snapshot) => {
@@ -25,6 +30,26 @@ const Banners = () => {
 
     return () => unsub();
   }, []);
+
+  // 🔥 IMAGE UPLOAD HANDLER
+  const handleImageUpload = async (file) => {
+    if (!file) return;
+
+    setUploading(true);
+    try {
+      const imageRef = ref(
+        storage,
+        `banners/${Date.now()}_${file.name}`
+      );
+      await uploadBytes(imageRef, file);
+      const url = await getDownloadURL(imageRef);
+      setImage(url);
+    } catch (err) {
+      console.error(err);
+      alert("Image upload failed");
+    }
+    setUploading(false);
+  };
 
   const handleAdd = async () => {
     if (!title || !image) return alert("Please fill all fields");
@@ -41,7 +66,8 @@ const Banners = () => {
     <div className="p-6">
       <h2 className="text-2xl font-bold mb-4">Manage Banners</h2>
 
-      <div className="flex gap-2 mb-4">
+      {/* ADD BANNER */}
+      <div className="flex gap-2 mb-4 items-center">
         <input
           type="text"
           placeholder="Banner Title"
@@ -49,21 +75,25 @@ const Banners = () => {
           value={title}
           onChange={(e) => setTitle(e.target.value)}
         />
+
+        {/* 🔥 GALLERY UPLOAD */}
         <input
-          type="text"
-          placeholder="Image URL"
-          className="border px-2 py-1 rounded w-1/3"
-          value={image}
-          onChange={(e) => setImage(e.target.value)}
+          type="file"
+          accept="image/*"
+          className="border px-2 py-1 rounded w-1/3 text-sm"
+          onChange={(e) => handleImageUpload(e.target.files[0])}
         />
+
         <button
           className="bg-blue-500 text-white px-4 py-1 rounded"
           onClick={handleAdd}
+          disabled={uploading}
         >
-          Add Banner
+          {uploading ? "Uploading..." : "Add Banner"}
         </button>
       </div>
 
+      {/* BANNER LIST */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {banners.map((banner) => (
           <div key={banner.id} className="border rounded p-2 relative">
