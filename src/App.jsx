@@ -94,6 +94,9 @@ function App() {
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="*" element={<Navigate to="/login" />} />
+
+<Route path="/orders" element={<Orders />} />
+<Route path="/orders?today=true" element={<Orders onlyToday={true} />} />
         </Routes>
       )}
     </BrowserRouter>
