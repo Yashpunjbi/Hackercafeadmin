@@ -82,13 +82,12 @@ const Products = () => {
           value={newProduct.price}
           onChange={(e) => setNewProduct({ ...newProduct, price: e.target.value })}
         />
-        <input
-          type="text"
-          placeholder="Image URL"
-          className="border px-3 py-2 w-full"
-          value={newProduct.image}
-          onChange={(e) => setNewProduct({ ...newProduct, image: e.target.value })}
+          type="file"
+          accept="image/*"
+          className="border px-2 py-1 rounded w-1/3 text-sm"
+          onChange={(e) => handleImageUpload(e.target.files[0])}
         />
+
         <input
           type="text"
           placeholder="Category (e.g. pizza, sandwich)"
