@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { db } from "../firebase";
+import { db, storage } from "../firebase";
 import {
   collection,
   addDoc,
@@ -7,10 +7,12 @@ import {
   doc,
   getDocs,
 } from "firebase/firestore";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
 const Categories = () => {
   const [name, setName] = useState("");
   const [image, setImage] = useState("");
+  const [uploading, setUploading] = useState(false);
   const [categories, setCategories] = useState([]);
 
   useEffect(() => {
@@ -24,6 +26,24 @@ const Categories = () => {
       ...doc.data(),
     }));
     setCategories(list);
+  };
+
+  // 🔥 IMAGE UPLOAD
+  const handleImageUpload = async (file) => {
+    if (!file) return;
+    setUploading(true);
+    try {
+      const imageRef = ref(
+        storage,
+        `categories/${Date.now()}_${file.name}`
+      );
+      await uploadBytes(imageRef, file);
+      const url = await getDownloadURL(imageRef);
+      setImage(url);
+    } catch (err) {
+      alert("Image upload failed");
+    }
+    setUploading(false);
   };
 
   const handleAdd = async () => {
@@ -43,7 +63,8 @@ const Categories = () => {
     <div className="p-4">
       <h2 className="text-xl font-bold mb-4">Manage Categories</h2>
 
-      <div className="flex gap-2 mb-4">
+      {/* ADD CATEGORY */}
+      <div className="flex gap-2 mb-4 items-center">
         <input
           type="text"
           placeholder="Category name"
@@ -51,28 +72,36 @@ const Categories = () => {
           value={name}
           onChange={(e) => setName(e.target.value)}
         />
+
+        {/* 🔥 GALLERY UPLOAD */}
         <input
-          type="text"
-          placeholder="Image URL"
-          className="border px-2 py-1 rounded"
-          value={image}
-          onChange={(e) => setImage(e.target.value)}
+          type="file"
+          accept="image/*"
+          className="border px-2 py-1 rounded text-sm"
+          onChange={(e) => handleImageUpload(e.target.files[0])}
         />
+
         <button
           onClick={handleAdd}
           className="bg-green-600 text-white px-4 py-1 rounded"
+          disabled={uploading}
         >
-          Add
+          {uploading ? "Uploading..." : "Add"}
         </button>
       </div>
 
+      {/* CATEGORY LIST */}
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
         {categories.map((cat) => (
           <div
             key={cat.id}
             className="border p-2 rounded shadow text-center bg-white"
           >
-            <img src={cat.image} alt={cat.name} className="w-full h-24 object-cover rounded mb-2" />
+            <img
+              src={cat.image}
+              alt={cat.name}
+              className="w-full h-24 object-cover rounded mb-2"
+            />
             <p className="font-semibold">{cat.name}</p>
             <button
               onClick={() => handleDelete(cat.id)}
