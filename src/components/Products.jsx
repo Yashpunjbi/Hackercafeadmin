@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { db } from "../firebase";
+import { db, storage } from "../firebase";
 import {
   collection,
   addDoc,
@@ -8,9 +8,12 @@ import {
   doc,
   updateDoc,
 } from "firebase/firestore";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
 const Products = () => {
   const [products, setProducts] = useState([]);
+  const [uploading, setUploading] = useState(false);
+
   const [newProduct, setNewProduct] = useState({
     name: "",
     price: "",
@@ -25,16 +28,39 @@ const Products = () => {
     setProducts(items);
   };
 
+  useEffect(() => {
+    fetchProducts();
+  }, []);
+
+  // 🔥 IMAGE UPLOAD
+  const handleImageUpload = async (file) => {
+    if (!file) return;
+    setUploading(true);
+    try {
+      const imageRef = ref(
+        storage,
+        `products/${Date.now()}_${file.name}`
+      );
+      await uploadBytes(imageRef, file);
+      const url = await getDownloadURL(imageRef);
+      setNewProduct({ ...newProduct, image: url });
+    } catch (err) {
+      alert("Image upload failed");
+    }
+    setUploading(false);
+  };
+
   const addProduct = async () => {
-    if (!newProduct.name || !newProduct.price || !newProduct.image || !newProduct.category) {
+    const { name, price, image, category } = newProduct;
+    if (!name || !price || !image || !category) {
       alert("Please fill all fields.");
       return;
     }
 
     await addDoc(collection(db, "products"), {
       ...newProduct,
-      price: Number(newProduct.price),
-      category: newProduct.category.toLowerCase(), // lowercase for route match
+      price: Number(price),
+      category: category.toLowerCase(),
     });
 
     setNewProduct({
@@ -60,61 +86,81 @@ const Products = () => {
     fetchProducts();
   };
 
-  useEffect(() => {
-    fetchProducts();
-  }, []);
-
   return (
     <div className="p-4">
       <h2 className="text-xl font-bold mb-4">📦 Products</h2>
-      <div className="space-y-4">
+
+      {/* ADD PRODUCT */}
+      <div className="space-y-3">
         <input
           type="text"
           placeholder="Name"
           className="border px-3 py-2 w-full"
           value={newProduct.name}
-          onChange={(e) => setNewProduct({ ...newProduct, name: e.target.value })}
+          onChange={(e) =>
+            setNewProduct({ ...newProduct, name: e.target.value })
+          }
         />
+
         <input
           type="number"
           placeholder="Price"
           className="border px-3 py-2 w-full"
           value={newProduct.price}
-          onChange={(e) => setNewProduct({ ...newProduct, price: e.target.value })}
+          onChange={(e) =>
+            setNewProduct({ ...newProduct, price: e.target.value })
+          }
         />
+
+        {/* 🔥 GALLERY UPLOAD */}
+        <input
           type="file"
           accept="image/*"
-          className="border px-2 py-1 rounded w-1/3 text-sm"
+          className="border px-3 py-2 w-full text-sm"
           onChange={(e) => handleImageUpload(e.target.files[0])}
         />
 
         <input
           type="text"
-          placeholder="Category (e.g. pizza, sandwich)"
+          placeholder="Category (pizza, sandwich)"
           className="border px-3 py-2 w-full"
           value={newProduct.category}
-          onChange={(e) => setNewProduct({ ...newProduct, category: e.target.value })}
+          onChange={(e) =>
+            setNewProduct({ ...newProduct, category: e.target.value })
+          }
         />
+
         <button
           className="bg-green-500 text-white px-4 py-2"
           onClick={addProduct}
+          disabled={uploading}
         >
-          Add Product
+          {uploading ? "Uploading..." : "Add Product"}
         </button>
       </div>
 
+      {/* PRODUCT LIST */}
       <div className="mt-6 grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3">
         {products.map((product) => (
           <div key={product.id} className="border p-4 rounded">
-            <img src={product.image} alt="" className="h-32 object-cover w-full mb-2" />
+            <img
+              src={product.image}
+              alt=""
+              className="h-32 object-cover w-full mb-2"
+            />
             <h3 className="font-bold">{product.name}</h3>
             <p>₹{product.price}</p>
             <p>Category: {product.category}</p>
-            <p>Status: {product.inStock ? "In Stock ✅" : "Out of Stock ❌"}</p>
+            <p>
+              Status:{" "}
+              {product.inStock ? "In Stock ✅" : "Out of Stock ❌"}
+            </p>
             <div className="flex gap-2 mt-2">
               <button
                 className="bg-yellow-500 px-3 py-1 text-white"
-                onClick={() => toggleStock(product.id, product.inStock)}
+                onClick={() =>
+                  toggleStock(product.id, product.inStock)
+                }
               >
                 Toggle Stock
               </button>
