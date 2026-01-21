@@ -1,114 +1,79 @@
 import React, { useEffect, useState } from "react";
-import { db, storage } from "../firebase";
+import { db } from "../firebase";
 import {
   collection,
   addDoc,
   deleteDoc,
+  getDocs,
+  updateDoc,
   doc,
-  onSnapshot,
 } from "firebase/firestore";
-import {
-  ref,
-  uploadBytes,
-  getDownloadURL,
-} from "firebase/storage";
 
-const Banners = () => {
-  const [banners, setBanners] = useState([]);
-  const [title, setTitle] = useState("");
-  const [image, setImage] = useState(""); // image URL
-  const [uploading, setUploading] = useState(false);
+const Tiffins = () => {
+  const [tiffins, setTiffins] = useState([]);
+  const [name, setName] = useState("");
+  const [price, setPrice] = useState("");
+  const [image, setImage] = useState("");
+
+  const fetchTiffins = async () => {
+    const snap = await getDocs(collection(db, "tiffins"));
+    setTiffins(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+  };
 
   useEffect(() => {
-    const unsub = onSnapshot(collection(db, "banners"), (snapshot) => {
-      const list = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-      setBanners(list);
-    });
-
-    return () => unsub();
+    fetchTiffins();
   }, []);
 
-  // 🔥 IMAGE UPLOAD HANDLER
-  const handleImageUpload = async (file) => {
-    if (!file) return;
+  const addTiffin = async () => {
+    if (!name || !price || !image) return alert("All fields required");
 
-    setUploading(true);
-    try {
-      const imageRef = ref(
-        storage,
-        `banners/${Date.now()}_${file.name}`
-      );
-      await uploadBytes(imageRef, file);
-      const url = await getDownloadURL(imageRef);
-      setImage(url);
-    } catch (err) {
-      console.error(err);
-      alert("Image upload failed");
-    }
-    setUploading(false);
-  };
+    await addDoc(collection(db, "tiffins"), {
+      name,
+      price: Number(price),
+      image,
+      available: true,
+    });
 
-  const handleAdd = async () => {
-    if (!title || !image) return alert("Please fill all fields");
-    await addDoc(collection(db, "banners"), { title, image });
-    setTitle("");
+    setName("");
+    setPrice("");
     setImage("");
+    fetchTiffins();
   };
 
-  const handleDelete = async (id) => {
-    await deleteDoc(doc(db, "banners", id));
+  const deleteTiffin = async (id) => {
+    await deleteDoc(doc(db, "tiffins", id));
+    fetchTiffins();
+  };
+
+  const toggleAvailability = async (id, status) => {
+    await updateDoc(doc(db, "tiffins", id), {
+      available: !status,
+    });
+    fetchTiffins();
   };
 
   return (
     <div className="p-6">
-      <h2 className="text-2xl font-bold mb-4">Manage Banners</h2>
+      <h2 className="text-2xl font-bold mb-4">🍱 School Tiffin Products</h2>
 
-      {/* ADD BANNER */}
-      <div className="flex gap-2 mb-4 items-center">
-        <input
-          type="text"
-          placeholder="Banner Title"
-          className="border px-2 py-1 rounded w-1/3"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-        />
-
-        {/* 🔥 GALLERY UPLOAD */}
-        <input
-          type="file"
-          accept="image/*"
-          className="border px-2 py-1 rounded w-1/3 text-sm"
-          onChange={(e) => handleImageUpload(e.target.files[0])}
-        />
-
-        <button
-          className="bg-blue-500 text-white px-4 py-1 rounded"
-          onClick={handleAdd}
-          disabled={uploading}
-        >
-          {uploading ? "Uploading..." : "Add Banner"}
-        </button>
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-2 mb-4">
+        <input placeholder="Tiffin Name" className="border p-2" value={name} onChange={e => setName(e.target.value)} />
+        <input placeholder="Price" type="number" className="border p-2" value={price} onChange={e => setPrice(e.target.value)} />
+        <input placeholder="Image URL" className="border p-2" value={image} onChange={e => setImage(e.target.value)} />
+        <button onClick={addTiffin} className="bg-green-600 text-white rounded">Add</button>
       </div>
 
-      {/* BANNER LIST */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {banners.map((banner) => (
-          <div key={banner.id} className="border rounded p-2 relative">
-            <img
-              src={banner.image}
-              alt={banner.title}
-              className="w-full h-32 object-cover rounded"
-            />
-            <h4 className="mt-2 font-semibold">{banner.title}</h4>
-            <button
-              className="absolute top-2 right-2 text-white bg-red-600 px-2 py-1 text-sm rounded"
-              onClick={() => handleDelete(banner.id)}
-            >
-              Delete
-            </button>
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        {tiffins.map(t => (
+          <div key={t.id} className="border rounded p-2">
+            <img src={t.image} className="h-32 w-full object-cover rounded" />
+            <h3 className="font-semibold mt-1">{t.name}</h3>
+            <p>₹{t.price}</p>
+            <p className="text-sm">{t.available ? "Available ✅" : "Unavailable ❌"}</p>
+            <div className="flex gap-2 mt-2">
+              <button onClick={() => toggleAvailability(t.id, t.available)} className="bg-yellow-500 text-white px-2 rounded">Toggle</button>
+              <button onClick={() => deleteTiffin(t.id)} className="bg-red-600 text-white px-2 rounded">Delete</button>
+            </div>
           </div>
         ))}
       </div>
@@ -116,4 +81,4 @@ const Banners = () => {
   );
 };
 
-export default Banners;
+export default Tiffins;
