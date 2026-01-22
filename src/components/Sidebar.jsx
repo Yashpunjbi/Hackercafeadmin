@@ -20,7 +20,7 @@ const Sidebar = ({ isOpen, onClose }) => {
         <Link to="/" className={location.pathname === "/" ? "font-bold" : ""}>Dashboard</Link>
         <Link to="/orders" className={location.pathname === "/orders" ? "font-bold" : ""}>Orders</Link>
         <Link to="/products" className={location.pathname === "/products" ? "font-bold" : ""}>Products</Link>
-        <Link to="/offersadmin" className={location.pathname === "/offersadmin" ? "font-bold" : ""}>Offers</Link>
+        <Link to="/tiffin" className={location.pathname === "/tiffin" ? "font-bold" : ""}>Tiffin</Link>
         <Link to="/banners" className={location.pathname === "/banners" ? "font-bold" : ""}>Banners</Link>
         <Link to="/categories" className={location.pathname === "/categories" ? "font-bold" : ""}>Categories</Link>
         <Link to="/promo-codes" className={location.pathname === "/promo-codes" ? "font-bold" : ""}>Promo Codes</Link>
