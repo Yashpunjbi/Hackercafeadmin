@@ -6,7 +6,7 @@ import Products from "./components/Products";
 import Login from "./components/Login";
 import Sidebar from "./components/Sidebar";
 import useIsMobile from "./hooks/useIsMobile";
-import OffersAdmin from "./components/OffersAdmin";
+import Tiffin from "./components/Tiffin";
 import Banners from "./components/Banners";
 import Categories from "./components/Categories";
 import PromoCodeManager from './components/PromoCodeManager';
@@ -55,10 +55,10 @@ function App() {
                 }
               />
               <Route
-                path="/offersadmin"
+                path="/tiffin"
                 element={
                   <PrivateRoute>
-                    <OffersAdmin />
+                    <Tiffin />
                   </PrivateRoute>
                 }
               />
