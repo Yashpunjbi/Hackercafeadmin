@@ -14,7 +14,30 @@ const Tiffin = () => {
   const [name, setName] = useState("");
   const [price, setPrice] = useState("");
   const [image, setImage] = useState("");
+  const [uploading, setUploading] = useState(false);
   const [tiffins, setTiffins] = useState([]);
+
+  // 🔹 Cloudinary upload
+  const uploadImage = async (file) => {
+    setUploading(true);
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("upload_preset", "hacker_cafe_u");
+
+    const res = await fetch(
+      "https://api.cloudinary.com/v1_1/dkdkq23w7/image/upload",
+      {
+        method: "POST",
+        body: formData,
+      }
+    );
+
+    const data = await res.json();
+    setUploading(false);
+
+    if (!data.secure_url) throw new Error("Upload failed");
+    return data.secure_url;
+  };
 
   const fetchTiffins = async () => {
     const snap = await getDocs(collection(db, "Tiffins"));
@@ -22,14 +45,14 @@ const Tiffin = () => {
   };
 
   const addTiffin = async () => {
-    if (!name || !price) return alert("Name & price required");
+    if (!name || !price || !image)
+      return alert("Name, price & image required");
 
     await addDoc(collection(db, "Tiffins"), {
       name,
       price: Number(price),
       image,
       available: true,
-      category: "school",
       createdAt: serverTimestamp(),
     });
 
@@ -39,9 +62,9 @@ const Tiffin = () => {
     fetchTiffins();
   };
 
-  const toggleStock = async (id, currentStatus) => {
+  const toggleStock = async (id, status) => {
     await updateDoc(doc(db, "Tiffins", id), {
-      available: !currentStatus,
+      available: !status,
     });
     fetchTiffins();
   };
@@ -68,6 +91,7 @@ const Tiffin = () => {
           onChange={(e) => setName(e.target.value)}
           className="border p-2 w-full mb-2"
         />
+
         <input
           placeholder="Price"
           type="number"
@@ -75,15 +99,37 @@ const Tiffin = () => {
           onChange={(e) => setPrice(e.target.value)}
           className="border p-2 w-full mb-2"
         />
+
         <input
-          placeholder="Image URL"
-          value={image}
-          onChange={(e) => setImage(e.target.value)}
+          type="file"
+          accept="image/*"
           className="border p-2 w-full mb-2"
+          onChange={async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            try {
+              const url = await uploadImage(file);
+              setImage(url);
+            } catch {
+              alert("Image upload failed");
+            }
+          }}
         />
+
+        {uploading && (
+          <p className="text-sm text-blue-600">Uploading image...</p>
+        )}
+
+        {image && (
+          <img
+            src={image}
+            className="h-32 w-32 object-cover rounded mb-2"
+          />
+        )}
+
         <button
           onClick={addTiffin}
-          className="bg-green-600 text-white px-4 py-2 rounded"
+          className="bg-green-600 text-white px-4 py-2 rounded w-full"
         >
           Add Tiffin
         </button>
