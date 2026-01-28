@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { db, storage } from "../firebase";
+import { db } from "../firebase";
 import {
   collection,
   addDoc,
@@ -8,13 +8,12 @@ import {
   doc,
   updateDoc,
 } from "firebase/firestore";
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
 const Products = () => {
   const [products, setProducts] = useState([]);
   const [uploading, setUploading] = useState(false);
 
-  const [newProduct, setNewProduct] = useState({
+  const [p, setP] = useState({
     name: "",
     price: "",
     image: "",
@@ -22,158 +21,64 @@ const Products = () => {
     inStock: true,
   });
 
+  const uploadImage = async (file) => {
+    setUploading(true);
+    const fd = new FormData();
+    fd.append("file", file);
+    fd.append("upload_preset", "hacker_cafe_upload");
+
+    const res = await fetch(
+      "https://api.cloudinary.com/v1_1/dkdkq23w7/image/upload",
+      { method: "POST", body: fd }
+    );
+
+    const data = await res.json();
+    setUploading(false);
+    setP({ ...p, image: data.secure_url });
+  };
+
   const fetchProducts = async () => {
-    const snapshot = await getDocs(collection(db, "products"));
-    const items = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-    setProducts(items);
+    const snap = await getDocs(collection(db, "products"));
+    setProducts(snap.docs.map(d => ({ id: d.id, ...d.data() })));
   };
 
   useEffect(() => {
     fetchProducts();
   }, []);
 
-  // 🔥 IMAGE UPLOAD
-  const handleImageUpload = async (file) => {
-    if (!file) return;
-    setUploading(true);
-    try {
-      const imageRef = ref(
-        storage,
-        `products/${Date.now()}_${file.name}`
-      );
-      await uploadBytes(imageRef, file);
-      const url = await getDownloadURL(imageRef);
-      setNewProduct({ ...newProduct, image: url });
-    } catch (err) {
-      alert("Image upload failed");
-    }
-    setUploading(false);
-  };
-
   const addProduct = async () => {
-    const { name, price, image, category } = newProduct;
-    if (!name || !price || !image || !category) {
-      alert("Please fill all fields.");
-      return;
-    }
+    if (!p.name || !p.price || !p.image || !p.category)
+      return alert("Fill all");
 
     await addDoc(collection(db, "products"), {
-      ...newProduct,
-      price: Number(price),
-      category: category.toLowerCase(),
+      ...p,
+      price: Number(p.price),
     });
 
-    setNewProduct({
-      name: "",
-      price: "",
-      image: "",
-      category: "",
-      inStock: true,
-    });
-
-    fetchProducts();
-  };
-
-  const deleteProduct = async (id) => {
-    await deleteDoc(doc(db, "products", id));
-    fetchProducts();
-  };
-
-  const toggleStock = async (id, status) => {
-    await updateDoc(doc(db, "products", id), {
-      inStock: !status,
-    });
+    setP({ name: "", price: "", image: "", category: "", inStock: true });
     fetchProducts();
   };
 
   return (
     <div className="p-4">
-      <h2 className="text-xl font-bold mb-4">📦 Products</h2>
+      <h2 className="text-xl font-bold mb-4">Products</h2>
 
-      {/* ADD PRODUCT */}
-      <div className="space-y-3">
-        <input
-          type="text"
-          placeholder="Name"
-          className="border px-3 py-2 w-full"
-          value={newProduct.name}
-          onChange={(e) =>
-            setNewProduct({ ...newProduct, name: e.target.value })
-          }
-        />
+      <input placeholder="Name" className="border w-full mb-2"
+        value={p.name} onChange={e => setP({ ...p, name: e.target.value })} />
 
-        <input
-          type="number"
-          placeholder="Price"
-          className="border px-3 py-2 w-full"
-          value={newProduct.price}
-          onChange={(e) =>
-            setNewProduct({ ...newProduct, price: e.target.value })
-          }
-        />
+      <input placeholder="Price" type="number" className="border w-full mb-2"
+        value={p.price} onChange={e => setP({ ...p, price: e.target.value })} />
 
-        {/* 🔥 GALLERY UPLOAD */}
-        <input
-          type="file"
-          accept="image/*"
-          className="border px-3 py-2 w-full text-sm"
-          onChange={(e) => handleImageUpload(e.target.files[0])}
-        />
+      <input type="file" onChange={e => uploadImage(e.target.files[0])} />
 
-        <input
-          type="text"
-          placeholder="Category (pizza, sandwich)"
-          className="border px-3 py-2 w-full"
-          value={newProduct.category}
-          onChange={(e) =>
-            setNewProduct({ ...newProduct, category: e.target.value })
-          }
-        />
+      <input placeholder="Category" className="border w-full mb-2"
+        value={p.category} onChange={e => setP({ ...p, category: e.target.value })} />
 
-        <button
-          className="bg-green-500 text-white px-4 py-2"
-          onClick={addProduct}
-          disabled={uploading}
-        >
-          {uploading ? "Uploading..." : "Add Product"}
-        </button>
-      </div>
-
-      {/* PRODUCT LIST */}
-      <div className="mt-6 grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3">
-        {products.map((product) => (
-          <div key={product.id} className="border p-4 rounded">
-            <img
-              src={product.image}
-              alt=""
-              className="h-32 object-cover w-full mb-2"
-            />
-            <h3 className="font-bold">{product.name}</h3>
-            <p>₹{product.price}</p>
-            <p>Category: {product.category}</p>
-            <p>
-              Status:{" "}
-              {product.inStock ? "In Stock ✅" : "Out of Stock ❌"}
-            </p>
-            <div className="flex gap-2 mt-2">
-              <button
-                className="bg-yellow-500 px-3 py-1 text-white"
-                onClick={() =>
-                  toggleStock(product.id, product.inStock)
-                }
-              >
-                Toggle Stock
-              </button>
-              <button
-                className="bg-red-500 px-3 py-1 text-white"
-                onClick={() => deleteProduct(product.id)}
-              >
-                Delete
-              </button>
-            </div>
-          </div>
-        ))}
-      </div>
+      <button onClick={addProduct}
+        disabled={uploading}
+        className="bg-green-600 text-white px-4 py-2">
+        {uploading ? "Uploading..." : "Add Product"}
+      </button>
     </div>
   );
 };
