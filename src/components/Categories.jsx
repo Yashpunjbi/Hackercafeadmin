@@ -15,6 +15,29 @@ const Categories = () => {
   const [uploading, setUploading] = useState(false);
   const [categories, setCategories] = useState([]);
 
+const uploadImage = async (file) => {
+  const formData = new FormData();
+  formData.append("file", file);
+  formData.append("upload_preset", "hacker_cafe_u");
+
+  const res = await fetch(
+    "https://api.cloudinary.com/v1_1/dkdkq23w7/image/upload",
+    {
+      method: "POST",
+      body: formData,
+    }
+  );
+
+  const data = await res.json();
+
+  if (!data.secure_url) {
+    throw new Error("Image upload failed");
+  }
+
+  return data.secure_url;
+};
+
+
   useEffect(() => {
     fetchCategories();
   }, []);
