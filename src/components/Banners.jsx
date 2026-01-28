@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { db, storage } from "../firebase";
+import { db } from "../firebase";
 import {
   collection,
   addDoc,
@@ -7,107 +7,75 @@ import {
   doc,
   onSnapshot,
 } from "firebase/firestore";
-import {
-  ref,
-  uploadBytes,
-  getDownloadURL,
-} from "firebase/storage";
 
 const Banners = () => {
   const [banners, setBanners] = useState([]);
   const [title, setTitle] = useState("");
-  const [image, setImage] = useState(""); // image URL
+  const [image, setImage] = useState("");
   const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
-    const unsub = onSnapshot(collection(db, "banners"), (snapshot) => {
-      const list = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-      setBanners(list);
+    return onSnapshot(collection(db, "banners"), (snap) => {
+      setBanners(snap.docs.map(d => ({ id: d.id, ...d.data() })));
     });
-
-    return () => unsub();
   }, []);
 
-  // 🔥 IMAGE UPLOAD HANDLER
-  const handleImageUpload = async (file) => {
-    if (!file) return;
-
+  const uploadImage = async (file) => {
     setUploading(true);
-    try {
-      const imageRef = ref(
-        storage,
-        `banners/${Date.now()}_${file.name}`
-      );
-      await uploadBytes(imageRef, file);
-      const url = await getDownloadURL(imageRef);
-      setImage(url);
-    } catch (err) {
-      console.error(err);
-      alert("Image upload failed");
-    }
+    const fd = new FormData();
+    fd.append("file", file);
+    fd.append("upload_preset", "hacker_cafe_upload");
+
+    const res = await fetch(
+      "https://api.cloudinary.com/v1_1/dkdkq23w7/image/upload",
+      { method: "POST", body: fd }
+    );
+
+    const data = await res.json();
     setUploading(false);
+    setImage(data.secure_url);
   };
 
-  const handleAdd = async () => {
-    if (!title || !image) return alert("Please fill all fields");
+  const addBanner = async () => {
+    if (!title || !image) return alert("Fill all fields");
     await addDoc(collection(db, "banners"), { title, image });
     setTitle("");
     setImage("");
   };
 
-  const handleDelete = async (id) => {
-    await deleteDoc(doc(db, "banners", id));
-  };
-
   return (
     <div className="p-6">
-      <h2 className="text-2xl font-bold mb-4">Manage Banners</h2>
+      <h2 className="text-xl font-bold mb-4">Banners</h2>
 
-      {/* ADD BANNER */}
-      <div className="flex gap-2 mb-4 items-center">
+      <div className="flex gap-2 mb-4">
         <input
-          type="text"
-          placeholder="Banner Title"
-          className="border px-2 py-1 rounded w-1/3"
+          placeholder="Banner title"
+          className="border px-2 py-1"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
         />
 
-        {/* 🔥 GALLERY UPLOAD */}
-        <input
-          type="file"
-          accept="image/*"
-          className="border px-2 py-1 rounded w-1/3 text-sm"
-          onChange={(e) => handleImageUpload(e.target.files[0])}
-        />
+        <input type="file" onChange={(e) => uploadImage(e.target.files[0])} />
 
         <button
-          className="bg-blue-500 text-white px-4 py-1 rounded"
-          onClick={handleAdd}
+          onClick={addBanner}
           disabled={uploading}
+          className="bg-blue-600 text-white px-4"
         >
-          {uploading ? "Uploading..." : "Add Banner"}
+          {uploading ? "Uploading..." : "Add"}
         </button>
       </div>
 
-      {/* BANNER LIST */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {banners.map((banner) => (
-          <div key={banner.id} className="border rounded p-2 relative">
-            <img
-              src={banner.image}
-              alt={banner.title}
-              className="w-full h-32 object-cover rounded"
-            />
-            <h4 className="mt-2 font-semibold">{banner.title}</h4>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {banners.map(b => (
+          <div key={b.id} className="border p-2 relative">
+            <img src={b.image} className="h-32 w-full object-cover" />
+            <p className="mt-2">{b.title}</p>
             <button
-              className="absolute top-2 right-2 text-white bg-red-600 px-2 py-1 text-sm rounded"
-              onClick={() => handleDelete(banner.id)}
+              className="absolute top-2 right-2 bg-red-600 text-white px-2"
+              onClick={() => deleteDoc(doc(db, "banners", b.id))}
             >
-              Delete
+              X
             </button>
           </div>
         ))}
