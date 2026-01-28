@@ -4,6 +4,9 @@ import {
   collection,
   addDoc,
   getDocs,
+  deleteDoc,
+  doc,
+  updateDoc,
   serverTimestamp,
 } from "firebase/firestore";
 
@@ -33,6 +36,19 @@ const Tiffin = () => {
     setName("");
     setPrice("");
     setImage("");
+    fetchTiffins();
+  };
+
+  const toggleStock = async (id, currentStatus) => {
+    await updateDoc(doc(db, "Tiffins", id), {
+      available: !currentStatus,
+    });
+    fetchTiffins();
+  };
+
+  const deleteTiffin = async (id) => {
+    if (!window.confirm("Delete this tiffin?")) return;
+    await deleteDoc(doc(db, "Tiffins", id));
     fetchTiffins();
   };
 
@@ -76,13 +92,43 @@ const Tiffin = () => {
       {/* List */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {tiffins.map((t) => (
-          <div key={t.id} className="border p-3 rounded">
+          <div
+            key={t.id}
+            className={`border p-3 rounded ${
+              !t.available ? "opacity-60" : ""
+            }`}
+          >
             <img
               src={t.image}
               className="h-32 w-full object-cover rounded"
             />
+
             <h2 className="font-bold mt-2">{t.name}</h2>
-            <p className="text-green-600">₹{t.price}</p>
+            <p className="text-green-600 font-bold">₹{t.price}</p>
+
+            <p
+              className={`text-sm mt-1 font-semibold ${
+                t.available ? "text-green-600" : "text-red-500"
+              }`}
+            >
+              {t.available ? "In Stock" : "Out of Stock"}
+            </p>
+
+            <div className="flex gap-2 mt-3">
+              <button
+                onClick={() => toggleStock(t.id, t.available)}
+                className="flex-1 bg-yellow-500 text-white py-1 rounded"
+              >
+                {t.available ? "Out of Stock" : "In Stock"}
+              </button>
+
+              <button
+                onClick={() => deleteTiffin(t.id)}
+                className="flex-1 bg-red-600 text-white py-1 rounded"
+              >
+                Delete
+              </button>
+            </div>
           </div>
         ))}
       </div>
