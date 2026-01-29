@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { db } from "../firebase";
-import { collection, addDoc, deleteDoc, onSnapshot } from "firebase/firestore";
+import { collection, addDoc, deleteDoc, doc, onSnapshot } from "firebase/firestore";
 
 const Banners = () => {
   const [banners, setBanners] = useState([]);
   const [title, setTitle] = useState("");
   const [image, setImage] = useState("");
-  const [page, setPage] = useState("home"); // 🧠 Select page
+  const [page, setPage] = useState("home"); // Select page
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState("");
 
@@ -26,8 +26,16 @@ const Banners = () => {
     img.src = URL.createObjectURL(file);
 
     img.onload = async () => {
+      // 🔹 Minimum size check
       if (img.width < 1200 || img.height < 400) {
         setError("Minimum size 1200×400 px required");
+        setUploading(false);
+        return;
+      }
+
+      // 🔹 Maximum size check (optional, e.g., 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        setError("Maximum file size 5MB allowed");
         setUploading(false);
         return;
       }
@@ -53,12 +61,22 @@ const Banners = () => {
     await addDoc(collection(db, "banners"), {
       title,
       image,
-      page, // 🧠 Save page type
+      page, // Save page type
       createdAt: Date.now(),
     });
 
     setTitle("");
     setImage("");
+  };
+
+  const removeBanner = async (id) => {
+    try {
+      await deleteDoc(doc(db, "banners", id));
+      alert("Banner deleted successfully");
+    } catch (err) {
+      console.error(err);
+      alert("Failed to delete banner");
+    }
   };
 
   return (
@@ -81,10 +99,11 @@ const Banners = () => {
         />
 
         <p className="text-xs text-gray-500 mb-2">
-          Minimum size: 1200 × 400 px
+          Minimum size: 1200 × 400 px, Max size: 5MB
         </p>
 
         {error && <p className="text-red-600 mb-2">{error}</p>}
+
         {image && (
           <img
             src={image}
@@ -92,7 +111,6 @@ const Banners = () => {
           />
         )}
 
-        {/* 🧠 Select page */}
         <select
           value={page}
           onChange={(e) => setPage(e.target.value)}
@@ -120,7 +138,7 @@ const Banners = () => {
             <p className="text-center text-sm text-gray-500 mb-2">{b.page}</p>
 
             <button
-              onClick={() => deleteDoc(doc(db, "banners", b.id))}
+              onClick={() => removeBanner(b.id)}
               className="absolute top-2 right-2 bg-red-600 text-white px-2 py-1 text-xs rounded"
             >
               Delete
